@@ -26,7 +26,8 @@ function App() {
 
   return (
     <>
-      <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-teal-50 to-white p-4">
+      <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
@@ -61,12 +62,14 @@ function App() {
 
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Entrar
           </button>
         </form>
       </div>
+    </div>
+
     </>
   );
 }
