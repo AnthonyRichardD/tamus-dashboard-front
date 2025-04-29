@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type AlertTypes = '' | 'error' | 'success' | 'warning';
+export type AlertTypes = '' | 'error' | 'success' | 'warning';
 
 type AlertState = {
   isOpen: boolean;
