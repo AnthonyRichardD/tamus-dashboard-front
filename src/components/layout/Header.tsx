@@ -5,7 +5,7 @@ export function Header() {
     <header className="sticky top-0 z-10 bg-white h-16 border-b flex items-center px-4">
       <div className="flex-1 flex justify-end">
         <nav className="flex-1 justify-start content-center overflow-y-auto ">
-          <div className="space-y-1">Dashboard</div>
+          <span className="hidden md:inline">Dashboard</span>
         </nav>
         <div className="p-4 border-t">
           <div className="flex items-center gap-3">

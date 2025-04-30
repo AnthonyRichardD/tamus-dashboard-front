@@ -8,7 +8,7 @@ export function Sidebar() {
       {/* Mobile */}
       <Sheet>
         <SheetTrigger asChild className="md:hidden">
-          <div className="flex h-16 items-center px-4 border-b bg-white">
+          <div className="flex h-16 items-center px-2.5 border-b bg-white">
             <Button variant="ghost" size="icon" className="shrink-0">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
@@ -31,7 +31,21 @@ export function Sidebar() {
 function DesktopSidebarContent() {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center px-4 border-b">
+      <div className="flex h-16 content-center items-center px-4 border-b gap-2">
+        <div className="size-8 bg-teal-600 rounded-full flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-6"
+          >
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+        </div>
         <span>HealthScheduler</span>
       </div>
     </div>
