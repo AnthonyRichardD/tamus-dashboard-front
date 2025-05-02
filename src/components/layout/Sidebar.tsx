@@ -1,6 +1,7 @@
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { LogOutIcon } from 'lucide-react';
 
 export function Sidebar() {
   return (
@@ -10,7 +11,7 @@ export function Sidebar() {
         <SheetTrigger asChild className="md:hidden">
           <div className="flex h-16 items-center px-2.5 border-b bg-white">
             <Button variant="ghost" size="icon" className="shrink-0">
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5 " />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </div>
@@ -30,7 +31,7 @@ export function Sidebar() {
 
 function DesktopSidebarContent() {
   return (
-    <div className="flex h-full flex-col">
+    <div className=" justify-between flex h-full flex-col">
       <div className="flex h-16 content-center items-center px-4 border-b gap-2">
         <div className="size-8 bg-teal-600 rounded-full flex items-center justify-center">
           <svg
@@ -47,6 +48,10 @@ function DesktopSidebarContent() {
           </svg>
         </div>
         <span>HealthScheduler</span>
+      </div>
+      <div className="flex h-16 content-center items-center px-4 border-t gap-2 text-red-500">
+        <LogOutIcon />
+        <span>Sair</span>
       </div>
     </div>
   );
