@@ -5,13 +5,13 @@ import { useForm } from 'react-hook-form';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Link } from 'react-router';
 
 const formSchema = z
   .object({
@@ -41,7 +41,7 @@ const RecoverPassword = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Formulário enviado:', values);
   }
 
@@ -146,10 +146,9 @@ const RecoverPassword = () => {
                 Redefinir Senha
               </button>
 
-              <button
-                type="button"
+              <Link
+                to="/login"
                 className="w-full mb-3 bg-white hover:bg-[#F4F4F5] text-gray-800 py-2 px-4 rounded border border-gray-200 flex items-center justify-center gap-2 cursor-pointer"
-                onClick={() => (window.location.href = '/login')}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -167,7 +166,7 @@ const RecoverPassword = () => {
                   <path d="M19 12H5" />
                 </svg>
                 Voltar para o login
-              </button>
+              </Link>
             </div>
           </form>
         </Form>
