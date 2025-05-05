@@ -10,28 +10,49 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router'; // Import corrigido
 
 const formSchema = z.object({
   email: z
     .string()
-    .min(1, {
-      message: "O email é obrigatorio.",
-    })
-    .email({ message: "email invalido" }),
-})
+    .min(1, { message: 'O email é obrigatório.' })
+    .email({ message: 'Email inválido.' }),
+});
 
 export default function RecoverPasswordToken() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      email: '',
     },
-  })
-  const onSubmit = async () => {
-    console.log("enviando e-mail")
-  }
+  });
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      const response = await fetch('/api/admin/recover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: data.email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro na solicitação');
+      }
+
+      alert(
+        'Se o e-mail estiver cadastrado, você receberá um link de recuperação'
+      );
+    } catch (error) {
+      console.error('Erro ao enviar solicitação:', error);
+      alert(
+        'Se o e-mail estiver cadastrado, você receberá um link de recuperação'
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white flex flex-col items-center justify-center">
@@ -39,10 +60,8 @@ export default function RecoverPasswordToken() {
         <div className="w-16 h-16 mx-auto mb-4 bg-teal-600 rounded-full flex items-center justify-center">
           <Activity size={42} className="text-white" />
         </div>
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Recuperar Senha
-        </h1>
-        <p className="text-gray-600">
+        <h1 className="text-2xl font-medium text-gray-800">Recuperar Senha</h1>
+        <p className="text-gray-600 font-medium">
           Enviaremos instruções para redefinir sua senha
         </p>
       </div>
@@ -54,25 +73,33 @@ export default function RecoverPasswordToken() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-mail</FormLabel>
+                  <FormLabel className="font-medium">E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="digite seu email" {...field} />
+                    <Input
+                      placeholder="Digite seu e-mail cadastrado"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button className='bg-teal-600 hover:bg-teal-700 h-10 w-full' type="submit">Enviar instruções</Button>
+            <Button
+              className="bg-teal-600 hover:bg-teal-700 h-10 w-full font-medium"
+              type="submit"
+            >
+              Enviar instruções
+            </Button>
           </form>
         </Form>
-        <button
-          onClick={() => (window.location.href = '/Login')}
-          className=" leading-0 inline-flex items-center justify-center gap-2 text-[14px] h-10 w-full mt-2 py-1 text-[#000000] bg-white hover:bg-[#F4F4F5] rounded-md border border-gray-300"
+        <Link
+          to="/Login"
+          className="leading-0 inline-flex items-center justify-center gap-2 text-[14px] h-10 w-full mt-2 py-1 text-[#000000] bg-white hover:bg-[#F4F4F5] rounded-md border border-gray-300 font-medium"
         >
-          <ArrowLeft size={14} /> Voltar para o Login
-        </button>
+          <ArrowLeft size={14} /> Voltar para o login
+        </Link>
       </div>
-      <footer className="mt-6 text-center text-gray-500 text-xs">
+      <footer className="mt-6 text-center text-gray-500 text-xs font-medium">
         © 2025 Sistema de Agendamento de Saúde. Todos os direitos reservados.
       </footer>
     </div>
