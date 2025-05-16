@@ -12,45 +12,52 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router'; // Import corrigido
+import { Link } from 'react-router';
+import adminServices from '@/services/admin.services';
+import { useAlertStore } from '@/store/DialogAlert';
+import { useLoadingStore } from '@/store/loadingStore';
 
 const formSchema = z.object({
   email: z
     .string()
-    .min(1, { message: 'O email é obrigatório.' })
-    .email({ message: 'Email inválido.' }),
+    .min(1, { message: 'O e-mail é obrigatório.' })
+    .email({ message: 'E-mail inválido.' }),
 });
 
 export default function RecoverPasswordToken() {
+  const { showLoading, hideLoading } = useLoadingStore();
+  const { showAlert } = useAlertStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
     },
   });
-
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      const response = await fetch('/api/admin/recover', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: data.email }),
-      });
+      showLoading();
 
-      if (!response.ok) {
-        throw new Error('Erro na solicitação');
+      const response = await adminServices.RecoverPasswordToken(data.email);
+
+      if (response.is_error) {
+        showAlert('Erro ao recuperar senha', 'error', response.message || 'Tente novamente.');
+        return;
       }
 
-      alert(
-        'Se o e-mail estiver cadastrado, você receberá um link de recuperação'
+      showAlert(
+        'Recuperação de senha',
+        'success',
+        'Se o e-mail estiver cadastrado, você receberá um link de recuperação.'
       );
     } catch (error) {
       console.error('Erro ao enviar solicitação:', error);
-      alert(
-        'Se o e-mail estiver cadastrado, você receberá um link de recuperação'
+      showAlert(
+        'Erro inesperado',
+        'error',
+        'Ocorreu um problema durante a recuperação. Tente novamente mais tarde.'
       );
+    } finally {
+      hideLoading();
     }
   };
 
