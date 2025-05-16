@@ -12,6 +12,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router';
+import  adminServices  from '@/services/admin.services';
+import { useAlertStore } from '@/store/DialogAlert';
+import { useLoadingStore } from '@/store/loadingStore';
+import { useNavigate } from 'react-router-dom';
 
 const formSchema = z
   .object({
@@ -31,6 +35,8 @@ const formSchema = z
   });
 
 const RecoverPassword = () => {
+  const { showLoading, hideLoading } = useLoadingStore();
+  const { showAlert } = useAlertStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: 'onChange',
@@ -41,8 +47,39 @@ const RecoverPassword = () => {
     },
   });
 
+  const navigate = useNavigate();
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('Formulário enviado:', values);
+     try {
+          showLoading();
+    
+          const response = await adminServices.resetPassword({
+            code: values.verification_code, new_password: values.new_password});
+    
+          // Tratamento de sucesso
+          if (!response.is_error) {
+            // TODO: Salvar o token e gerenciar os estados
+            showAlert('Senha redefinida com sucesso!', 'success', response.message);
+
+            // Redirecionar para a página de login ou outra ação
+            setTimeout(() => {
+              navigate('/login');
+            }, 1500);
+            return;
+          }
+          console.log(response);
+          // Tratamento de erro conhecido (da API)
+          showAlert('Erro ao redefinir senha', 'error', response.message);
+        } catch (error) {
+          // Tratamento de erro inesperado
+          console.error('Erro na recuperação de senha:', error);
+          showAlert(
+            'Erro inesperado',
+            'error',
+            'Ocorreu um erro ao tentar recuperar a senha. Tente novamente mais tarde.'
+          );
+        } finally {
+          hideLoading();
+        }
   }
 
   return (
