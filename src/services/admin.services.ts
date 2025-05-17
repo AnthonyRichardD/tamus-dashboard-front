@@ -32,9 +32,9 @@ class AdminService {
       return error as ErrorResponse;
     }
   }
-    async RecoverPasswordToken(email: string): Promise<ErrorResponse> {
+  async RecoverPasswordToken(email: string): Promise<ErrorResponse> {
     try {
-      const response = await api.post('/admin/Recover', {email});
+      const response = await api.post('/admin/Recover', { email });
 
       localStorage.setItem('token', response.data.token);
       return response.data;
