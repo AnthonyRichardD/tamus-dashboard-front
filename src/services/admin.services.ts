@@ -47,7 +47,8 @@ class AdminService {
   ): Promise<ResetPasswordResponse> {
     try {
       const response = await api.post('/admin/reset', resetData);
-      return response.data;
+
+      return response as unknown as ResetPasswordResponse;
     } catch (error) {
       return error as ErrorResponse;
     }
