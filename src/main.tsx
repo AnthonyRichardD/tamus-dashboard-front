@@ -13,6 +13,7 @@ import DashboardLayout from './components/layout/DashboardLayout.tsx';
 import { DialogAlert } from './components/ui/dialogAlert.tsx';
 import { LoadingSpinner } from './components/ui/loadingSpinner.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
+import { ProtectedRoute } from './routes/protectedRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,7 +24,9 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/recuperar-senha" element={<RecoverPassword />} />
           <Route path="/" element={<App />} />
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
           </Route>
           <Route path="/login" element={<Login />} />
         </Routes>
