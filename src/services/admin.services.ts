@@ -10,7 +10,7 @@ interface UserLoginResponse {
     id: number;
     full_name: string;
     email: string;
-    role: string;
+    roles: string[];
   };
   message: string;
   is_error: boolean;
@@ -36,10 +36,20 @@ class AdminService {
     try {
       const response = await api.post('/auth', loginData);
 
-      localStorage.setItem('token', response.data.token);
-      return response.data;
-    } catch (error) {
-      return error as ErrorResponse;
+      return {
+        token: response.data.token,
+        user: {
+          ...response.data.user,
+          roles: [response.data.user.role],
+        },
+        message: response.data.message || 'Login realizado com sucesso',
+        is_error: false,
+      };
+    } catch (error: any) {
+      return {
+        is_error: true,
+        message: error.response?.data?.message || 'Erro ao realizar login',
+      };
     }
   }
 

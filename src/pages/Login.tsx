@@ -18,6 +18,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 // Stores
 import { useAlertStore } from '@/store/DialogAlert';
 import { useLoadingStore } from '@/store/loadingStore';
+import { useAuth } from '@/context/AuthContext';
 
 const formSchema = z.object({
   email: z
@@ -36,6 +37,7 @@ const formSchema = z.object({
 export function Login() {
   const { showLoading, hideLoading } = useLoadingStore();
   const { showAlert } = useAlertStore();
+  const { login } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,14 +52,16 @@ export function Login() {
 
       const response = await adminServices.login(values);
 
-      // Tratamento de sucesso
-      if (!response.is_error) {
-        // TODO: Salvar o token e gerenciar os estados
+      if (!response.is_error && response.token && response.user) {
+
+        await login({
+          email: values.email,
+          password: values.password
+        });
+
         showAlert('Login bem-sucedido!', 'success', 'Bem-vindo ao sistema');
         return;
       }
-
-      // Tratamento de erro conhecido (da API)
       showAlert('Erro na autenticação', 'error', response.message);
     } catch (error) {
       // Tratamento de erro inesperado

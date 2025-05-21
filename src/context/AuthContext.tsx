@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
 import { AuthContextType, LoginData, User } from '../types/auth.types';
+import adminServices from '@/services/admin.services';
+import api from '@/services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -16,16 +17,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const login = async (credentials: LoginData) => {
         try {
-            const response = await api.post('/login', credentials);
-            const { user, token } = response.data;
+            const response = await adminServices.login(credentials);
+            if (response.token && response.user) {
+                setUser(response.user);
+                setToken(response.token);
+                localStorage.setItem('token', response.token);
 
-            setUser(user);
-            setToken(token);
+                api.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
 
-            localStorage.setItem('user', JSON.stringify(user));
-            localStorage.setItem('token', token);
-
-            navigate('/dashboard');
+                navigate('/dashboard');
+                return;
+            }
+            throw new Error(response.message || 'Falha no login');
         } catch (error) {
             console.error('Erro no login:', error);
             alert('Falha no login. Verifique suas credenciais.');
@@ -35,8 +38,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         setUser(null);
         setToken(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
+
         navigate('/login');
     };
 
