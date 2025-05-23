@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import RecoverPassword from './pages/RecoverPassword.tsx';
 import './index.css';
 
@@ -12,6 +12,7 @@ import DashboardLayout from './components/layout/DashboardLayout.tsx';
 
 import { DialogAlert } from './components/ui/dialogAlert.tsx';
 import { LoadingSpinner } from './components/ui/loadingSpinner.tsx';
+import NotFound404 from './pages/NotFound404.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
         <Route path="/login" element={<Login />} />
+        <Route path="*" element={<NotFound404 />} />
       </Routes>
     </BrowserRouter>
     <LoadingSpinner />
