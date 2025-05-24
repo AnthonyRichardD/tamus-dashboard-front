@@ -48,7 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return user?.roles.some((role) => requiredRoles.includes(role)) || false;
     };
 
-    const value: AuthContextType = { user, token, login, logout, hasPermission };
+    const isAuthenticated = !!user;
+
+
+    const value: AuthContextType = { user, token, login, logout, hasPermission, isAuthenticated };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

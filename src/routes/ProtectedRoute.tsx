@@ -1,12 +1,22 @@
 import { useAuth } from '@/context/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
 
-export function ProtectedRoute() {
-    const { token } = useAuth();
+interface ProtectedRouteProps {
+    requiredRoles?: ('admin' | 'superadmin')[];
+}
 
-    if (!token) {
+export const ProtectedRoute = ({ requiredRoles }: ProtectedRouteProps) => {
+    const { isAuthenticated, hasPermission } = useAuth();
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (requiredRoles && !hasPermission(requiredRoles)) {
         return <Navigate to="/login" replace />;
     }
 
     return <Outlet />;
-}
+};
+
+
