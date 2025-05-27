@@ -22,6 +22,14 @@ interface ErrorResponse {
 }
 
 class AdminService {
+  async list() {
+    try {
+      const response = await api.get('/admin/list');
+      return response.data;
+    } catch (error) {
+      return error as ErrorResponse;
+    }
+  }
   async login(loginData: UserLogin): Promise<UserLoginResponse> {
     try {
       const response = await api.post('/auth', loginData);

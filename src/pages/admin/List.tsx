@@ -4,9 +4,12 @@ import { DropdownMenu, DropdownMenuSeparator, DropdownMenuTrigger } from "@/comp
 import { DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-menu"
 import { Edit, MoreHorizontal, Trash2, UserPlus } from "lucide-react"
 import { DynamicTable, TableColumn } from "@/components/ui/dynamic-table"
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { Link } from "react-router"
 import moment from "moment"
+import { useLoadingStore } from "@/store/loadingStore"
+import { useAlertStore } from "@/store/DialogAlert"
+import adminServices from "@/services/admin.services"
 
 interface Administrador {
     id: number
@@ -79,7 +82,39 @@ const tableContent = {
 
 
 export function AdminList() {
+    const { showLoading, hideLoading } = useLoadingStore();
+    const { showAlert } = useAlertStore();
     const [isLoading, setIsLoading] = useState(false)
+
+    async function getAdminList() {
+        try {
+            showLoading();
+
+            const response = await adminServices.list();
+
+            if (!response.is_error) {
+                console.log(response)
+                return;
+            }
+
+            showAlert('Erro na autenticação', 'error', response.message);
+        } catch (error) {
+            console.error('Erro no login:', error);
+            showAlert(
+                'Erro inesperado',
+                'error',
+                'Ocorreu um problema durante o login. Tente novamente mais tarde.'
+            );
+        } finally {
+            hideLoading();
+        }
+    }
+
+    useEffect(() => {
+        getAdminList();
+    }, []);
+
+
     const columns: TableColumn<Administrador>[] = [
         { label: "Nome", key: "nome_completo", sortable: true },
         { label: "CPF", key: "cpf", sortable: false },

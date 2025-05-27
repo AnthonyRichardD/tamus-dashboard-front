@@ -41,8 +41,8 @@ api.interceptors.response.use(
       is_error: (error.response?.data as { is_error: boolean }).is_error,
     };
 
-    if (error.response?.status === 401) {
-      //   TODO: só redirecionar para login sé o usuario não estiver na rota /login do react router
+    if (error.response?.status === 403) {
+      window.location.href = '/dashboard';
     }
 
     return Promise.reject(apiError);
