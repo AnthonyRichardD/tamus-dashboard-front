@@ -10,6 +10,7 @@ import moment from "moment"
 import { useLoadingStore } from "@/store/loadingStore"
 import { useAlertStore } from "@/store/DialogAlert"
 import adminServices from "@/services/admin.services"
+import { formatCPF } from "@/utils/formatUtils"
 
 interface Administrador {
     id: number,
@@ -60,7 +61,7 @@ export function AdminList() {
 
     const columns: TableColumn<Administrador>[] = [
         { label: "Nome", key: "full_name", sortable: true },
-        { label: "CPF", key: "cpf", sortable: false },
+        { label: "CPF", key: "cpf", sortable: false, slot: true },
         { label: "Email", key: "email", sortable: true },
         { label: "Telefone", key: "phone", sortable: false },
         { label: "Cargo", key: "role", sortable: true, slot: true },
@@ -90,7 +91,7 @@ export function AdminList() {
             case "full_name":
                 return <span className="font-medium">{item.full_name}</span>
             case "cpf":
-                return item.cpf
+                return formatCPF(item.cpf)
             case "role":
                 return (
                     <Badge variant={item.role === "superadmin" ? "default" : "outline"}>
