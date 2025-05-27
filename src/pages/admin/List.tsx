@@ -12,79 +12,21 @@ import { useAlertStore } from "@/store/DialogAlert"
 import adminServices from "@/services/admin.services"
 
 interface Administrador {
-    id: number
-    cpf: string
-    nome_completo: string
-    email: string
-    telefone: string
-    cargo: string
-    data_cadastro: string
-    status: "ativo" | "inativo" | "suspenso"
+    id: number,
+    cpf: string,
+    full_name: string,
+    email: string,
+    phone: string,
+    role: 'admin' | 'superadmin',
+    registration_date: string,
+    status: string,
 }
-
-const administradoresSimulados: Administrador[] = [
-    {
-        id: 1,
-        cpf: "12345678901",
-        nome_completo: "João Silva",
-        email: "joao.silva@saude.gov",
-        telefone: "(11) 98765-4321",
-        cargo: "admin",
-        data_cadastro: "2023-01-15T10:30:00",
-        status: "ativo",
-    },
-    {
-        id: 2,
-        cpf: "23456789012",
-        nome_completo: "Maria Oliveira",
-        email: "maria.oliveira@saude.gov",
-        telefone: "(11) 97654-3210",
-        cargo: "superadmin",
-        data_cadastro: "2023-02-20T14:45:00",
-        status: "ativo",
-    },
-    {
-        id: 3,
-        cpf: "34567890123",
-        nome_completo: "Carlos Santos",
-        email: "carlos.santos@saude.gov",
-        telefone: "(11) 96543-2109",
-        cargo: "admin",
-        data_cadastro: "2023-03-10T09:15:00",
-        status: "inativo",
-    },
-    {
-        id: 4,
-        cpf: "45678901234",
-        nome_completo: "Ana Pereira",
-        email: "ana.pereira@saude.gov",
-        telefone: "(11) 95432-1098",
-        cargo: "admin",
-        data_cadastro: "2023-04-05T16:20:00",
-        status: "ativo",
-    },
-    {
-        id: 5,
-        cpf: "56789012345",
-        nome_completo: "Roberto Almeida",
-        email: "roberto.almeida@saude.gov",
-        telefone: "(11) 94321-0987",
-        cargo: "admin",
-        data_cadastro: "2023-05-12T11:10:00",
-        status: "suspenso",
-    },
-]
-
-const tableContent = {
-    items: administradoresSimulados,
-}
-
-
 
 export function AdminList() {
     const { showLoading, hideLoading } = useLoadingStore();
     const { showAlert } = useAlertStore();
     const [isLoading, setIsLoading] = useState(false)
+    const [admins, setAdmins] = useState<Administrador[]>([])
 
     async function getAdminList() {
         try {
@@ -94,6 +36,7 @@ export function AdminList() {
 
             if (!response.is_error) {
                 console.log(response)
+                setAdmins(response.data);
                 return;
             }
 
@@ -116,26 +59,26 @@ export function AdminList() {
 
 
     const columns: TableColumn<Administrador>[] = [
-        { label: "Nome", key: "nome_completo", sortable: true },
+        { label: "Nome", key: "full_name", sortable: true },
         { label: "CPF", key: "cpf", sortable: false },
         { label: "Email", key: "email", sortable: true },
-        { label: "Telefone", key: "telefone", sortable: false },
-        { label: "Cargo", key: "cargo", sortable: true, slot: true },
+        { label: "Telefone", key: "phone", sortable: false },
+        { label: "Cargo", key: "role", sortable: true, slot: true },
         { label: "Status", key: "status", sortable: true, slot: true },
-        { label: "Data de Cadastro", key: "data_cadastro", sortable: true, slot: true },
+        { label: "Data de Cadastro", key: "registration_date", sortable: true, slot: true },
         { label: "Ações", key: "actions", sortable: false, slot: true, width: "80px" },
     ]
     const renderStatusBadge = (status: string) => {
         switch (status) {
-            case "ativo":
+            case "active":
                 return <Badge className="bg-green-500">Ativo</Badge>
-            case "inativo":
+            case "inactive":
                 return (
                     <Badge variant="outline" className="text-white bg-red-500">
                         Inativo
                     </Badge>
                 )
-            case "suspenso":
+            case "suspended":
                 return <Badge className="bg-amber-500">Suspenso</Badge>
             default:
                 return <Badge variant="outline">{status}</Badge>
@@ -144,20 +87,20 @@ export function AdminList() {
 
     const renderCell = (item: Administrador, column: TableColumn<Administrador>): ReactNode => {
         switch (column.key) {
-            case "nome_completo":
-                return <span className="font-medium">{item.nome_completo}</span>
+            case "full_name":
+                return <span className="font-medium">{item.full_name}</span>
             case "cpf":
                 return item.cpf
-            case "cargo":
+            case "role":
                 return (
-                    <Badge variant={item.cargo === "superadmin" ? "default" : "outline"}>
-                        {item.cargo === "superadmin" ? "SuperAdmin" : "Admin"}
+                    <Badge variant={item.role === "superadmin" ? "default" : "outline"}>
+                        {item.role === "superadmin" ? "SuperAdmin" : "Admin"}
                     </Badge>
                 )
             case "status":
                 return renderStatusBadge(item.status)
-            case "data_cadastro":
-                return moment(item.data_cadastro).format("DD/MM/YYYY")
+            case "registration_date":
+                return moment(item.registration_date).format("DD/MM/YYYY")
             case "actions":
                 return (
                     <DropdownMenu>
@@ -179,7 +122,7 @@ export function AdminList() {
                                     Editar
                                 </Link>
                             </DropdownMenuItem>
-                            {item.status === "ativo" ? (
+                            {item.status === "active" ? (
                                 <DropdownMenuItem className="text-amber-600 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
                                     Suspender
                                 </DropdownMenuItem>
@@ -211,7 +154,7 @@ export function AdminList() {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Administradores</h1>
@@ -223,10 +166,10 @@ export function AdminList() {
                 </Button>
             </div>
 
-            <div className="rounded-md border">
+            <div className="rounded-md border w-full">
                 <DynamicTable
                     columns={columns}
-                    data={tableContent.items}
+                    data={admins}
                     renderCell={renderCell}
                     emptyMessage="Nenhum administrador encontrado."
                     isLoading={isLoading}

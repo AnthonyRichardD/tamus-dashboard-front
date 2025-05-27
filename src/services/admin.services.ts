@@ -25,7 +25,7 @@ class AdminService {
   async list() {
     try {
       const response = await api.get('/admin/list');
-      return response.data;
+      return response;
     } catch (error) {
       return error as ErrorResponse;
     }
