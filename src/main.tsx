@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import RecoverPassword from './pages/RecoverPassword.tsx';
 import './index.css';
 
@@ -14,6 +14,7 @@ import { DialogAlert } from './components/ui/dialogAlert.tsx';
 import { LoadingSpinner } from './components/ui/loadingSpinner.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
+import NotFound404 from './pages/NotFound404.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
             </Route>
           </Route>
           <Route path="/login" element={<Login />} />
+          <Route path="*" element={<NotFound404 />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
