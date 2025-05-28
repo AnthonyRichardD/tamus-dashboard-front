@@ -13,7 +13,7 @@ export const ProtectedRoute = ({ requiredRoles }: ProtectedRouteProps) => {
     }
 
     if (requiredRoles && !hasPermission(requiredRoles)) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/*" replace />;
     }
 
     return <Outlet />;
