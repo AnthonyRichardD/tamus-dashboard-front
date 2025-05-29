@@ -1,9 +1,8 @@
-"use client"
-
 import { useState, type ReactNode } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { Pagination } from "./pagination"
 
 export interface TableColumn<T = any> {
   label: string
@@ -29,6 +28,12 @@ export interface DynamicTableProps<T = any> {
   emptyMessage?: string
   isLoading?: boolean
   loadingRows?: number
+  pagination?: {
+    currentPage: number
+    itemsPerPage: number
+    totalItems: number
+    onPageChange: (page: number) => void
+  }
 }
 
 export function DynamicTable<T extends Record<string, any>>({
@@ -41,7 +46,9 @@ export function DynamicTable<T extends Record<string, any>>({
   emptyMessage = "Nenhum registro encontrado.",
   isLoading = false,
   loadingRows = 5,
+  pagination,
 }: DynamicTableProps<T>) {
+
   const [internalSortConfig, setInternalSortConfig] = useState<{
     key: string | null
     direction: "ascending" | "descending"
@@ -125,64 +132,75 @@ export function DynamicTable<T extends Record<string, any>>({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns
-            .filter((column) => !column.hidden)
-            .map((column) => (
-              <TableHead
-                key={column.key}
-                className={cn(
-                  column.sortable && "cursor-pointer",
-                  column.align === "center" && "text-center",
-                  column.align === "right" && "text-right",
-                  column.className,
-                )}
-                style={{ width: column.width }}
-                onClick={() => column.sortable && handleSort(column.key)}
-              >
-                <div className="flex items-center">
-                  {column.label}
-                  {renderSortIcon(column)}
-                </div>
-              </TableHead>
-            ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {isLoading ? (
-          renderLoadingRows()
-        ) : data.length === 0 ? (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell
-              colSpan={columns.filter((col) => !col.hidden).length}
-              className="text-center py-8 text-muted-foreground"
-            >
-              {emptyMessage}
-            </TableCell>
+            {columns
+              .filter((column) => !column.hidden)
+              .map((column) => (
+                <TableHead
+                  key={column.key}
+                  className={cn(
+                    column.sortable && "cursor-pointer",
+                    column.align === "center" && "text-center",
+                    column.align === "right" && "text-right",
+                    column.className,
+                  )}
+                  style={{ width: column.width }}
+                  onClick={() => column.sortable && handleSort(column.key)}
+                >
+                  <div className="flex items-center">
+                    {column.label}
+                    {renderSortIcon(column)}
+                  </div>
+                </TableHead>
+              ))}
           </TableRow>
-        ) : (
-          data.map((item, index) => (
-            <TableRow key={index} className={rowClassName ? rowClassName(item) : ""}>
-              {columns
-                .filter((column) => !column.hidden)
-                .map((column) => (
-                  <TableCell
-                    key={`${index}-${column.key}`}
-                    className={cn(
-                      column.align === "center" && "text-center",
-                      column.align === "right" && "text-right",
-                      column.className,
-                    )}
-                  >
-                    {getCellContent(item, column)}
-                  </TableCell>
-                ))}
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            renderLoadingRows()
+          ) : data.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.filter((col) => !col.hidden).length}
+                className="text-center py-8 text-muted-foreground"
+              >
+                {emptyMessage}
+              </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            data.map((item, index) => (
+              <TableRow key={index} className={rowClassName ? rowClassName(item) : ""}>
+                {columns
+                  .filter((column) => !column.hidden)
+                  .map((column) => (
+                    <TableCell
+                      key={`${index}-${column.key}`}
+                      className={cn(
+                        column.align === "center" && "text-center",
+                        column.align === "right" && "text-right",
+                        column.className,
+                      )}
+                    >
+                      {getCellContent(item, column)}
+                    </TableCell>
+                  ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+
+      {pagination && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          itemsPerPage={pagination.itemsPerPage}
+          totalItems={pagination.totalItems}
+          onPageChange={pagination.onPageChange}
+        />
+      )}
+    </div>
   )
 }

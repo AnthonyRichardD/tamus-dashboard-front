@@ -7,7 +7,6 @@ import { DynamicTable, TableColumn } from "@/components/ui/dynamic-table"
 import { ReactNode, useEffect, useState } from "react"
 import { Link } from "react-router"
 import moment from "moment"
-import { useLoadingStore } from "@/store/loadingStore"
 import { useAlertStore } from "@/store/DialogAlert"
 import adminServices from "@/services/admin.services"
 import { formatCPF } from "@/utils/formatUtils"
@@ -24,40 +23,60 @@ interface Administrador {
 }
 
 export function AdminList() {
-    const { showLoading, hideLoading } = useLoadingStore();
     const { showAlert } = useAlertStore();
     const [isLoading, setIsLoading] = useState(false)
     const [admins, setAdmins] = useState<Administrador[]>([])
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit_per_page: 3,
+        total: 0
+    })
+    const [filters, setFilters] = useState({})
 
-    async function getAdminList() {
+    async function getAdminList(page = 1) {
         try {
-            showLoading();
-
-            const response = await adminServices.list();
+            setIsLoading(true);
+            const response = await adminServices.list({
+                page,
+                limit_per_page: pagination.limit_per_page,
+                filters
+            });
 
             if (!response.is_error) {
-                console.log(response)
                 setAdmins(response.data);
+                setPagination(prev => ({
+                    ...prev,
+                    total: response.pagination.total,
+                    page
+                }));
                 return;
             }
 
-            showAlert('Erro na autenticação', 'error', response.message);
+            showAlert('Erro na listagem', 'error', response.message);
         } catch (error) {
-            console.error('Erro no login:', error);
+            console.error('Erro ao listar administradores:', error);
             showAlert(
                 'Erro inesperado',
                 'error',
-                'Ocorreu um problema durante o login. Tente novamente mais tarde.'
+                'Ocorreu um problema ao carregar os administradores. Tente novamente mais tarde.'
             );
         } finally {
-            hideLoading();
+            setIsLoading(false);
         }
     }
+
+    const handlePageChange = (newPage: number) => {
+        getAdminList(newPage);
+    };
+
+    const applyFilters = (newFilters: any) => {
+        setFilters(newFilters);
+        getAdminList(1); // Reset para a primeira página com novos filtros
+    };
 
     useEffect(() => {
         getAdminList();
     }, []);
-
 
     const columns: TableColumn<Administrador>[] = [
         { label: "Nome", key: "full_name", sortable: true },
@@ -69,6 +88,7 @@ export function AdminList() {
         { label: "Data de Cadastro", key: "registration_date", sortable: true, slot: true },
         { label: "Ações", key: "actions", sortable: false, slot: true, width: "80px" },
     ]
+
     const renderStatusBadge = (status: string) => {
         switch (status) {
             case "active":
@@ -147,13 +167,6 @@ export function AdminList() {
         }
     }
 
-    const handleSimulateLoading = () => {
-        setIsLoading(true)
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 2000)
-    }
-
     return (
         <div className="space-y-6 p-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -161,21 +174,25 @@ export function AdminList() {
                     <h1 className="text-2xl font-bold tracking-tight">Administradores</h1>
                     <p className="text-muted-foreground">Gerencie os administradores do sistema de agendamento.</p>
                 </div>
-                <Button onClick={() => handleSimulateLoading()} className="w-fit bg-black text-white hover:bg-black/90">
+                <Button className="w-fit bg-black text-white hover:bg-black/90">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Novo Administrador
                 </Button>
             </div>
 
-            <div className="rounded-md border w-full">
-                <DynamicTable
-                    columns={columns}
-                    data={admins}
-                    renderCell={renderCell}
-                    emptyMessage="Nenhum administrador encontrado."
-                    isLoading={isLoading}
-                />
-            </div>
+            <DynamicTable
+                columns={columns}
+                data={admins}
+                renderCell={renderCell}
+                emptyMessage="Nenhum administrador encontrado."
+                isLoading={isLoading}
+                pagination={{
+                    currentPage: pagination.page,
+                    itemsPerPage: pagination.limit_per_page,
+                    totalItems: pagination.total,
+                    onPageChange: handlePageChange
+                }}
+            />
         </div>
     );
 }
