@@ -1,15 +1,19 @@
-import { useState } from "react"
-import { ArrowLeft, Save } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PasswordInput } from "@/components/ui/password-input"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { useState } from "react";
+import { ArrowLeft, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PasswordInput } from "@/components/ui/password-input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { useLoadingStore } from "@/store/loadingStore";
+import adminServices from "@/services/admin.services";
+import { useAlertStore } from "@/store/DialogAlert";
+import { useNavigate } from "react-router-dom";
 
 function generateRandomPassword(length = 10) {
   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -18,7 +22,7 @@ function generateRandomPassword(length = 10) {
     password += chars.charAt(Math.floor(Math.random() * chars.length))
   }
   return password
-}
+};
 
 function isValidCPF(cpf: string) {
   cpf = cpf.replace(/\D/g, '');
@@ -34,19 +38,19 @@ function isValidCPF(cpf: string) {
   if (rev === 10 || rev === 11) rev = 0;
   if (rev !== Number(cpf.charAt(10))) return false;
   return true;
-}
+};
 
 const formSchema = z.object({
   full_name: z.string().min(7, { message: "Nome completo é obrigatório" }),
   cpf: z.string()
-  .length(11, { message: "CPF deve ter 11 dígitos" })
-  .refine(isValidCPF, {message: "CPF inválido"}),
+    .length(11, { message: "CPF deve ter 11 dígitos" })
+    .refine(isValidCPF, { message: "CPF inválido" }),
   email: z.string().email({ message: "Email inválido" }),
   phone: z.string().optional(),
   cargo: z.string().min(1, "Cargo é obrigatório"),
   status: z.enum(["ativo", "inativo"]),
   gerarSenha: z.boolean().optional(),
-  senha: z.string().min(8, "Senha deve ter pelo menos 8 caracteres").optional(),
+  senha: z.string().optional(),
 }).refine((data) => {
   if (!data.gerarSenha) {
     return !!data.senha && data.senha.length >= 8
@@ -55,10 +59,12 @@ const formSchema = z.object({
 }, {
   message: "Senha deve ter pelo menos 8 caracteres",
   path: ["senha"],
-})
+});
 
 export default function AdminForm() {
-  const [gerarSenha, setGerarSenha] = useState(false)
+  const [gerarSenha, setGerarSenha] = useState(false);
+  const { showLoading, hideLoading } = useLoadingStore();
+  const { showAlert } = useAlertStore();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,7 +77,7 @@ export default function AdminForm() {
       gerarSenha: false,
       senha: "",
     },
-  })
+  });
 
   const handleCheckbox = (checked: boolean) => {
     setGerarSenha(checked)
@@ -79,22 +85,61 @@ export default function AdminForm() {
     if (checked) {
       form.setValue("senha", "")
     }
-  }
+  };
 
   const handleCpfChange = (fieldOnChange: (value: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const onlyNums = e.target.value.replace(/\D/g, '').slice(0, 11)
     fieldOnChange(onlyNums)
-  }
+  };
 
-  async function onSubmit(values: z.infer<typeof formSchema>){
-    let senhaFinal = values.senha
-    if (values.gerarSenha) {
-      senhaFinal = generateRandomPassword(10)
+  const navigate = useNavigate();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    showLoading();
+    try {
+      if (!values.gerarSenha && !values.senha) {
+        showAlert("Erro", "error", "Por favor, preencha a senha ou marque a opção de gerar senha automaticamente.");
+        hideLoading();
+        return;
+      }
+
+      if (values.gerarSenha) {
+        values.senha = generateRandomPassword(10);
+      }
+
+      const response = await adminServices.createAdmin({
+        full_name: values.full_name,
+        cpf: values.cpf,
+        email: values.email,
+        phone: values.phone || "",
+        role: "admin",
+        status: values.status === "ativo" ? "ACTIVE" : "INACTIVE",
+        password: values.senha || "",
+      });
+
+      if (
+        response.message?.toLowerCase().includes("acesso negado") ||
+        response.message?.toLowerCase().includes("não tem permissão")
+      ) {
+        showAlert("Acesso negado", "error", "Você não tem permissão para realizar esta ação.");
+        return;
+      }
+
+      if (!response.is_error) {
+        showAlert("Administrador criado com sucesso!", "success", response.message);
+        setTimeout(() => {
+          navigate("/admin/list");
+        }, 1500);
+        return;
+      }
+
+      showAlert("Erro", "error", response.message || "Erro ao criar administrador.");
+    } catch (error) {
+      console.error('Erro:', error);
+      showAlert("Erro inesperado", "error", "Erro inesperado ao criar administrador. Tente novamente.");
+    } finally {
+      hideLoading();
     }
-    console.log("Formulário enviado com os seguintes dados:", {
-      ...values,
-      senha: senhaFinal,
-    })
   }
 
   return (
