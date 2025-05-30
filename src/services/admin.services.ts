@@ -46,11 +46,6 @@ interface CreateAdminResponse {
   is_error: boolean;
 }
 
-class AdminService {
-  async login(loginData: UserLogin): Promise<UserLoginResponse> {
-    try {
-      const response = await api.post('/auth', loginData);
-
 interface ListParams {
   page?: number;
   limit_per_page?: number;
@@ -58,7 +53,6 @@ interface ListParams {
     [key: string]: string | number;
   };
 }
-
 
 class AdminService {
   async list(params?: ListParams) {
