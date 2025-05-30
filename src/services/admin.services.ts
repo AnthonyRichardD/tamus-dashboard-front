@@ -7,7 +7,6 @@ interface UserLogin {
 interface UserLoginResponse {
   token?: string;
   user?: {
-    id: number;
     full_name: string;
     email: string;
     roles: string[];
@@ -34,7 +33,7 @@ interface ResetPasswordResponse {
 class AdminService {
   async login(loginData: UserLogin): Promise<UserLoginResponse> {
     try {
-      const response = await api.post('/auth', loginData);
+      const response = await api.post('/auth/login', loginData);
 
       return {
         token: response.data.token,
@@ -48,7 +47,7 @@ class AdminService {
     } catch (error: any) {
       return {
         is_error: true,
-        message: error.response?.data?.message || 'Erro ao realizar login',
+        message: error.message || 'Erro ao realizar login',
       };
     }
   }

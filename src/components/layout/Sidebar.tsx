@@ -1,4 +1,5 @@
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { useAuth } from '@/context/AuthContext';
 import { LogOutIcon } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ export function Sidebar({ isOpen, onOpenChange }: SidebarProps) {
   );
 }
 function DesktopSidebarContent() {
+  const { logout } = useAuth();
   return (
     <div className="justify-between flex h-full flex-col">
       <div className="flex h-16 min-h-16 content-center items-center px-4 border-b gap-2">
@@ -49,10 +51,10 @@ function DesktopSidebarContent() {
           <span>Dashboard</span>
         </button>
       </div>
-      <div className="flex h-16 min-h-16 content-center items-center px-4 border-t gap-2 text-red-500">
+      <button onClick={() => { logout(); }} className="flex h-16 min-h-16 content-center items-center px-4 border-t gap-2 text-red-500 cursor-pointer">
         <LogOutIcon />
         <span>Sair</span>
-      </div>
+      </button>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContextType, LoginData, User } from '../types/auth.types';
 import adminServices from '@/services/admin.services';
@@ -20,25 +20,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const response = await adminServices.login(credentials);
             if (response.token && response.user) {
                 setUser(response.user);
+                localStorage.setItem('user', JSON.stringify(response.user));
                 setToken(response.token);
                 localStorage.setItem('token', response.token);
 
                 api.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
 
                 navigate('/dashboard');
-                return;
+                return {
+                    is_error: false,
+                    message: response.message,
+                };
             }
-            throw new Error(response.message || 'Falha no login');
+            return {
+                is_error: true,
+                message: response.message,
+            }
         } catch (error) {
             console.error('Erro no login:', error);
-            alert('Falha no login. Verifique suas credenciais.');
+            return {
+                is_error: true,
+                message: 'Erro ao realizar login',
+            }
         }
     };
-
-    const logout = () => {
+    const clearAuth = async () => {
         setUser(null);
+        localStorage.removeItem('user');
         setToken(null);
+        localStorage.removeItem('token');
         delete api.defaults.headers.common['Authorization'];
+    }
+    const logout = async () => {
+        await clearAuth();
 
         navigate('/login');
     };
@@ -48,8 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return user?.roles.some((role) => requiredRoles.includes(role)) || false;
     };
 
-    const isAuthenticated = !!user;
-
+    const isAuthenticated = () => {
+        return token !== null;
+    }
 
     const value: AuthContextType = { user, token, login, logout, hasPermission, isAuthenticated };
 
