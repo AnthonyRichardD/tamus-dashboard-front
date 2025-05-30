@@ -8,6 +8,9 @@ import App from './App.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import RecoverPasswordToken from './pages/RecoverPasswordToken.tsx';
 import DashboardLayout from './components/layout/DashboardLayout.tsx';
+
+import AdminCreationForm from './pages/AdminCreationForm.tsx';
+
 import { Login } from './pages/Login.tsx';
 import { AdminList } from './pages/admin/List.tsx';
 
@@ -27,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<App />} />
           <Route element={<DashboardLayout />}>
             <Route element={<ProtectedRoute requiredRoles={['admin', 'superadmin']} />}>
+              <Route path="criar-admin" element={<AdminCreationForm />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>

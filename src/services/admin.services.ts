@@ -30,6 +30,22 @@ interface ResetPasswordResponse {
   is_error: boolean;
 }
 
+
+interface CreateAdminRequest {
+  full_name: string;
+  email: string;
+  role: string;
+  cpf: string;
+  phone: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  password: string;
+}
+
+interface CreateAdminResponse {
+  message: string;
+  is_error: boolean;
+}
+
 interface ListParams {
   page?: number;
   limit_per_page?: number;
@@ -92,6 +108,17 @@ class AdminService {
       const response = await api.post('/admin/reset', resetData);
 
       return response as unknown as ResetPasswordResponse;
+    } catch (error) {
+      return error as ErrorResponse;
+    }
+  }
+
+  async createAdmin(
+    adminData: CreateAdminRequest
+  ): Promise<CreateAdminResponse> {
+    try {
+      const response = await api.post('/admin/create', adminData);
+      return response.data;
     } catch (error) {
       return error as ErrorResponse;
     }
