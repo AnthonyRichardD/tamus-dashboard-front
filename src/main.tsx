@@ -7,8 +7,9 @@ import './index.css';
 import App from './App.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import RecoverPasswordToken from './pages/RecoverPasswordToken.tsx';
-import { Login } from './pages/Login.tsx';
 import DashboardLayout from './components/layout/DashboardLayout.tsx';
+import { Login } from './pages/Login.tsx';
+import { AdminList } from './pages/admin/List.tsx';
 
 import { DialogAlert } from './components/ui/dialogAlert.tsx';
 import { LoadingSpinner } from './components/ui/loadingSpinner.tsx';
