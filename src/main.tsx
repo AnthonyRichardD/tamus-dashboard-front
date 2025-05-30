@@ -29,6 +29,9 @@ createRoot(document.getElementById('root')!).render(
             <Route element={<ProtectedRoute requiredRoles={['admin', 'superadmin']} />}>
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
+            <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>
+              <Route path="/admin/list" element={<AdminList />} />
+            </Route>
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound404 />} />

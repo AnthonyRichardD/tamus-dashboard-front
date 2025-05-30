@@ -4,7 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 import {
   LogOutIcon,
   LayoutDashboard,
-  Clock,
   UserCog,
   ChevronLeft,
 } from 'lucide-react';
@@ -14,7 +13,7 @@ import { useNavigate, useLocation } from 'react-router';
 interface SidebarProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  userRole: string;
+  userRole: string | undefined;
 }
 
 export function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps) {
@@ -46,7 +45,7 @@ export function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps) {
   );
 }
 
-function DesktopSidebarContent({ userRole }: { userRole: string }) {
+function DesktopSidebarContent({ userRole }: { userRole: string | undefined }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,12 +53,11 @@ function DesktopSidebarContent({ userRole }: { userRole: string }) {
 
   const sidebarItems = [
     { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'superadmin'], icon: <LayoutDashboard /> },
-    { name: 'Horários', path: '/schedules', roles: ['admin', 'superadmin'], icon: <Clock /> },
-    { name: 'Administradores', path: '/admin/create', roles: ['superadmin'], icon: <UserCog /> },
+    { name: 'Administradores', path: '/admin/list', roles: ['superadmin'], icon: <UserCog /> },
   ];
 
 
-  const filteredItems = sidebarItems.filter((item) => item.roles.includes(userRole));
+  const filteredItems = sidebarItems.filter((item) => userRole !== undefined && item.roles.includes(userRole));
 
 
   const getItemClass = (path: string) =>
