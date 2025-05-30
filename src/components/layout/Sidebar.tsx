@@ -89,7 +89,7 @@ function DesktopSidebarContent({ userRole }: { userRole: string }) {
       </div>
 
       {/* Menu de Navegação */}
-      <div className="w-full p-2 h-full">
+      <div className="w-full p-2 h-full space-y-1">
         {filteredItems.map((item) => (
           <button
             key={item.name}
