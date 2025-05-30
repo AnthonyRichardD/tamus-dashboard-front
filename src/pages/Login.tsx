@@ -12,12 +12,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Activity, LogIn } from 'lucide-react';
 import { Link } from 'react-router';
-import adminServices from '@/services/admin.services';
 import { PasswordInput } from '@/components/ui/password-input';
 
 // Stores
 import { useAlertStore } from '@/store/DialogAlert';
 import { useLoadingStore } from '@/store/loadingStore';
+import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   email: z
@@ -36,6 +37,7 @@ const formSchema = z.object({
 export function Login() {
   const { showLoading, hideLoading } = useLoadingStore();
   const { showAlert } = useAlertStore();
+  const { login, isAuthenticated } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,23 +46,27 @@ export function Login() {
     },
   });
 
+  useEffect(() => {
+    if (isAuthenticated()) {
+      window.location.href = '/dashboard';
+    }
+  }, [isAuthenticated]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       showLoading();
 
-      const response = await adminServices.login(values);
+      const response = await login({
+        email: values.email,
+        password: values.password
+      })
 
-      // Tratamento de sucesso
       if (!response.is_error) {
-        // TODO: Salvar o token e gerenciar os estados
-        showAlert('Login bem-sucedido!', 'success', 'Bem-vindo ao sistema');
         return;
       }
 
-      // Tratamento de erro conhecido (da API)
       showAlert('Erro na autenticação', 'error', response.message);
     } catch (error) {
-      // Tratamento de erro inesperado
       console.error('Erro no login:', error);
       showAlert(
         'Erro inesperado',
