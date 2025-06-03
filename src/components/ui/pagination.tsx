@@ -73,7 +73,7 @@ export function Pagination({
             {pages.map((page) => (
                 <Button
                     key={page}
-                    variant={currentPage === page ? "default" : "outline"}
+                    variant={currentPage === page ? "secondary" : "outline"}
                     size="icon"
                     onClick={() => onPageChange(page)}
                     className="h-8 w-8"

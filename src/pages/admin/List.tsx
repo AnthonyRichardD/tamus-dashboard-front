@@ -28,7 +28,7 @@ export function AdminList() {
     const [admins, setAdmins] = useState<Administrador[]>([])
     const [pagination, setPagination] = useState({
         page: 1,
-        limit_per_page: 5,
+        limit_per_page: 1,
         total: 0
     })
     const [filters, setFilters] = useState({})
