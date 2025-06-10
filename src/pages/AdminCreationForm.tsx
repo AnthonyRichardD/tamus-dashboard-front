@@ -250,7 +250,8 @@ export default function AdminForm() {
                             <SelectValue placeholder="Selecione um cargo" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="administrador">Administrador</SelectItem>
+                            <SelectItem value="admin">Administrador</SelectItem>
+                            <SelectItem value="superadmin">Super Administrador</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>

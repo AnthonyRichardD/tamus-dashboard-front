@@ -30,7 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<App />} />
           <Route element={<DashboardLayout />}>
             <Route element={<ProtectedRoute requiredRoles={['admin', 'superadmin']} />}>
-              <Route path="criar-admin" element={<AdminCreationForm />} />
+              <Route path="/admin/create" element={<AdminCreationForm />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>
