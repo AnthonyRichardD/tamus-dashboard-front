@@ -19,6 +19,7 @@ import { LoadingSpinner } from './components/ui/loadingSpinner.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
 import NotFound404 from './pages/NotFound404.tsx';
+import ConultationDetails from './pages/ConsultationDetails.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/recuperar-senha" element={<RecoverPassword />} />
           <Route path="/" element={<App />} />
           <Route element={<DashboardLayout />}>
+           <Route path="/detalhes-consulta" element={<ConultationDetails />} />
             <Route element={<ProtectedRoute requiredRoles={['admin', 'superadmin']} />}>
               <Route path="/admin/create" element={<AdminCreationForm />} />
               <Route path="/dashboard" element={<Dashboard />} />
