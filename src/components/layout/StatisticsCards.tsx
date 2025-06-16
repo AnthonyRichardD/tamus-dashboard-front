@@ -11,7 +11,7 @@ export function StatisticsCards({ consultations }: { consultations: Consultation
   }
 
   return (
-    <div className="mb-6 grid grid-cols-5 gap-4">
+    <div className="mb-6 grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       <Card>
         <CardContent className="p-4">
           <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
