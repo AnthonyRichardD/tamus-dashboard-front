@@ -183,9 +183,6 @@ export function PatientList() {
           <h1 className="text-2xl font-bold tracking-tight">Pacientes</h1>
           <p className="text-muted-foreground">Gerencie os pacientes cadastrados no sistema.</p>
         </div>
-        <Button onClick={handleNewPatient} className="w-full md:w-fit">
-          + Novo Paciente
-        </Button>
       </header>
 
       <main>
