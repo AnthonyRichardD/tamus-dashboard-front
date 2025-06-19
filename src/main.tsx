@@ -23,8 +23,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/login" element={<Login />} />
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/paciente/:id" element={<PatientDetailsPage />} />
         </Route>
-        <Route path="/paciente/:id" element={<PatientDetailsPage />} />
       </Routes>
     </BrowserRouter>
     <LoadingSpinner />
