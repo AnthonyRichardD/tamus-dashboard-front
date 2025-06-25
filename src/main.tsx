@@ -37,21 +37,21 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/recuperar-senha" element={<RecoverPassword />} />
           <Route path="/" element={<App />} />
           <Route element={<DashboardLayout />}>
-           <Route path="/detalhes-consulta" element={<ConultationDetails />} />
+            <Route path="/detalhes-consulta" element={<ConultationDetails />} />
             <Route element={<ProtectedRoute requiredRoles={['admin', 'superadmin']} />}>
               <Route path="/admin/create" element={<AdminCreationForm />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
-            
+
             <Route path="/patients/editar/:id" element={<PatientUpdate />} />
-            <Route path="/lista-de-paciente" element={< PatientList/>} />
-            
+            <Route path="/lista-de-paciente" element={< PatientList />} />
+
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>
               <Route path="/admin/list" element={<AdminList />} />
             </Route>
 
-                 <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/paciente/:id" element={<PatientDetailsPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/paciente/:id" element={<PatientDetailsPage />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound404 />} />
