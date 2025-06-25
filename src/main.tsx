@@ -20,6 +20,8 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
 import NotFound404 from './pages/NotFound404.tsx';
 import ConultationDetails from './pages/ConsultationDetails.tsx';
+import { PatientList } from './pages/PatientList.tsx';
+import PatientUpdate from "./pages/update/PatientUpdate.tsx";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -35,6 +37,10 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/admin/create" element={<AdminCreationForm />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
+            
+            <Route path="/patients/editar/:id" element={<PatientUpdate />} />
+            <Route path="/lista-de-paciente" element={< PatientList/>} />
+            
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>
               <Route path="/admin/list" element={<AdminList />} />
             </Route>
