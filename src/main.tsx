@@ -14,16 +14,21 @@ import AdminCreationForm from './pages/AdminCreationForm.tsx';
 import { Login } from './pages/Login.tsx';
 import { AdminList } from './pages/admin/List.tsx';
 
-import { DialogAlert } from './components/ui/dialogAlert.tsx';
-import { LoadingSpinner } from './components/ui/loadingSpinner.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
 import NotFound404 from './pages/NotFound404.tsx';
 import ConultationDetails from './pages/ConsultationDetails.tsx';
 import { PatientList } from './pages/PatientList.tsx';
 import PatientUpdate from "./pages/update/PatientUpdate.tsx";
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(
+
+import { PatientDetailsPage } from "./components/patient/PatientDetailsPage.tsx";
+
+import { DialogAlert } from "./components/ui/dialogAlert.tsx";
+import { LoadingSpinner } from "./components/ui/loadingSpinner.tsx";
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
@@ -49,8 +54,17 @@ createRoot(document.getElementById('root')!).render(
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </AuthProvider>
+      <Routes>
+        <Route path="/esqueci-minha-senha" element={<RecoverPasswordToken />} />
+        <Route path="/recuperar-senha" element={<RecoverPassword />} />
+        <Route path="/login" element={<Login />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/paciente/:id" element={<PatientDetailsPage />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
     <LoadingSpinner />
     <DialogAlert />
   </StrictMode>
-);
+)
