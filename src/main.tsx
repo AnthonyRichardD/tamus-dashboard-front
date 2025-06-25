@@ -49,20 +49,14 @@ createRoot(document.getElementById("root")!).render(
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>
               <Route path="/admin/list" element={<AdminList />} />
             </Route>
+
+                 <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/paciente/:id" element={<PatientDetailsPage />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </AuthProvider>
-      <Routes>
-        <Route path="/esqueci-minha-senha" element={<RecoverPasswordToken />} />
-        <Route path="/recuperar-senha" element={<RecoverPassword />} />
-        <Route path="/login" element={<Login />} />
-        <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/paciente/:id" element={<PatientDetailsPage />} />
-        </Route>
-      </Routes>
     </BrowserRouter>
     <LoadingSpinner />
     <DialogAlert />
