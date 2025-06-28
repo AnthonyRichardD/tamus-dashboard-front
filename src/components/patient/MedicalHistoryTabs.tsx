@@ -1,4 +1,3 @@
-// components/patient/MedicalHistoryTabs.tsx
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Consultation, Exam } from '../../types/patient';

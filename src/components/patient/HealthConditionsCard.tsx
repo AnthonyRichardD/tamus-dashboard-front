@@ -1,8 +1,7 @@
-// components/patient/HealthConditionsCard.tsx
 import React from 'react';
 import { Card, CardContent } from '../ui/card';
 import { HealthCondition } from '../../types/patient';
-import { MdOutlineWarningAmber } from 'react-icons/md'; // Exemplo de ícone, instale react-icons
+import { MdOutlineWarningAmber } from 'react-icons/md';
 
 interface HealthConditionsCardProps {
     data: HealthCondition[];
