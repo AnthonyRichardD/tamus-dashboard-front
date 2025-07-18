@@ -1,11 +1,11 @@
+// src/pages/Dashboard.tsx
 import { DashboardIndicators } from "./dashboardWidgets/DashboardIndicators";
 
-export default function Dashboard() {
+export default function HelloWord() {
   return (
     <div className="space-y-6 p-4">
       <DashboardIndicators />
-      <h1>hello</h1>
+      {/* Aqui você incluirá os outros widgets nas próximas tasks */}
     </div>
-    
   );
 }
