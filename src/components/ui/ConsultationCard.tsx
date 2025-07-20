@@ -52,7 +52,7 @@ export function ConsultationCard({ consultation, onViewDetails }: {
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
                         <div className="mb-2 flex items-center gap-3">
-                            <h3 className="font-semibold text-gray-900">Paciente #{consultation.patient_id}</h3>
+                            <h3 className="font-semibold text-gray-900">{consultation.patient.full_name} #{consultation.patient_id}</h3>
                             <Badge className={config.color}>{config.label}</Badge>
                         </div>
 
@@ -67,11 +67,11 @@ export function ConsultationCard({ consultation, onViewDetails }: {
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                                 <Calendar className="h-4 w-4" />
-                                {formatDate(consultation.start_time)}
+                                {formatDate(consultation.slot.start_time)}
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                                 <Clock className="h-4 w-4" />
-                                {formatTimeRange(consultation.start_time, consultation.end_time)}
+                                {formatTimeRange(consultation.slot.start_time, consultation.slot.end_time)}
                             </div>
                         </div>
 

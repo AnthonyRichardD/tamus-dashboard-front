@@ -1,34 +1,75 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { mockConsultations } from "@/data/mock-consultation"
 import { isToday, isThisWeek } from "@/utils/dateUtils"
 import { StatisticsCards } from "@/components/ui/StatisticsCards"
 import { PeriodFilter } from "@/components/ui/PeriodFilter"
 import { ConsultationCard } from "@/components/ui/ConsultationCard"
 import { useNavigate } from "react-router-dom"
+import consultationServices from "@/services/consultation.services"
+import { useEffect } from "react"
+import { Consultation, ConsultationListResponse } from "@/types/consultation"
+
 export type FilterPeriod = "today" | "this_week" | "all"
 
 export default function ConsultationDetails() {
-    const navigate = useNavigate();
-    const [activePeriod, setActivePeriod] = useState<FilterPeriod>("today")
+  const navigate = useNavigate();
+  const [activePeriod, setActivePeriod] = useState<FilterPeriod>("today");
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [,setPagination] = useState<ConsultationListResponse["pagination"] | null>(null);
+  const [,setLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
+  const [filters] = useState<{ [key: string]: string | number } | undefined>(undefined);
 
-    const filteredConsultations = useMemo(() => {
-        return mockConsultations.filter((consultation) => {
-            switch (activePeriod) {
-                case "today":
-                    return isToday(consultation.start_time)
-                case "this_week":
-                    return isThisWeek(consultation.start_time)
-                case "all":
-                    return true
-                default:
-                    return true
-            }
-        })
-    }, [activePeriod])
+  const fetchConsultations = useCallback(
+    async (customFilters?: { [key: string]: string | number }) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response: ConsultationListResponse = await consultationServices.listConsultations({
+          page: 1,
+          limit_per_page: 10,
+          filters: customFilters || filters,
+        });
+
+        setConsultations(response.data);
+        setPagination(response.pagination);
+      } catch (error: any) {
+        console.error("Erro ao buscar consultas:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+        setError(error.message || "Não foi possível carregar as consultas. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters] 
+  );
+
+  useEffect(() => {
+    fetchConsultations();
+  }, [fetchConsultations]); 
+
+
+  const filteredConsultations = useMemo(() => {
+    return consultations.filter((consultation) => {
+      switch (activePeriod) {
+        case "today":
+          return isToday(consultation.slot.start_time)
+        case "this_week":
+          return isThisWeek(consultation.slot.start_time)
+        case "all":
+          return true
+        default:
+          return true
+      }
+    })
+  }, [consultations, activePeriod])
 
     const handleViewDetails = (consultationId: number) => {
         alert(`Navegando para detalhes da consulta ${consultationId}`)

@@ -1,7 +1,7 @@
 
 import { mockProfessionals } from "@/data/mock-professionals"
 import { mockConsultationTypes } from "@/data/mock-consultation-type"
-import { mockExamTypes } from "@/data/mock-exam-types"
+import { mockExamTypes } from "@/data/mock-exam-type"
 import type { AppointmentType } from "@/types/patient"
 
 interface Step2ServiceSelectionProps {
