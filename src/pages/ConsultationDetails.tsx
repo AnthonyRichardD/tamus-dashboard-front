@@ -10,9 +10,7 @@ import { ConsultationCard } from "@/components/ui/ConsultationCard"
 import { useNavigate } from "react-router-dom"
 import consultationServices from "@/services/consultation.services"
 import { useEffect } from "react"
-import { Consultation, ConsultationListResponse } from "@/types/consultation"
-
-export type FilterPeriod = "today" | "this_week" | "all"
+import { Consultation, ConsultationListResponse, FilterPeriod } from "@/types/consultation"
 
 export default function ConsultationDetails() {
   const navigate = useNavigate();
