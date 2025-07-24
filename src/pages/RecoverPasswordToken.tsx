@@ -8,7 +8,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -80,7 +79,7 @@ export default function RecoverPasswordToken() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-medium">E-mail</FormLabel>
+                  <label className="text-sm font-medium leading-none">E-mail</label>
                   <FormControl>
                     <Input
                       placeholder="Digite seu e-mail cadastrado"

@@ -1,13 +1,9 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { useAuth } from '@/context/AuthContext';
 
 import {
   LogOutIcon,
   LayoutDashboard,
-  Clock,
   UserCog,
   ChevronLeft,
 } from 'lucide-react';
@@ -17,7 +13,7 @@ import { useNavigate, useLocation } from 'react-router';
 interface SidebarProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  userRole: string;
+  userRole: string | undefined;
 }
 
 export function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps) {
@@ -49,19 +45,19 @@ export function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps) {
   );
 }
 
-function DesktopSidebarContent({ userRole }: { userRole: string }) {
+function DesktopSidebarContent({ userRole }: { userRole: string | undefined }) {
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
 
   const sidebarItems = [
     { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'superadmin'], icon: <LayoutDashboard /> },
-    { name: 'Horários', path: '/schedules', roles: ['admin', 'superadmin'], icon: <Clock /> },
-    { name: 'Administradores', path: '/admin/create', roles: ['superadmin'], icon: <UserCog /> },
+    { name: 'Administradores', path: '/admin/list', roles: ['superadmin'], icon: <UserCog /> },
   ];
 
 
-  const filteredItems = sidebarItems.filter((item) => item.roles.includes(userRole));
+  const filteredItems = sidebarItems.filter((item) => userRole !== undefined && item.roles.includes(userRole));
 
 
   const getItemClass = (path: string) =>
@@ -91,7 +87,7 @@ function DesktopSidebarContent({ userRole }: { userRole: string }) {
       </div>
 
       {/* Menu de Navegação */}
-      <div className="w-full p-2 h-full">
+      <div className="w-full p-2 h-full space-y-1">
         {filteredItems.map((item) => (
           <button
             key={item.name}
@@ -105,12 +101,10 @@ function DesktopSidebarContent({ userRole }: { userRole: string }) {
           </button>
         ))}
       </div>
-
-      {/* Footer - Botão de Sair */}
-      <div className="flex h-16 min-h-16 content-center items-center px-4 border-t gap-2 text-red-500 cursor-pointer">
+      <button onClick={() => { logout(); }} className="flex h-16 min-h-16 content-center items-center px-4 border-t gap-2 text-red-500 cursor-pointer">
         <LogOutIcon />
         <span>Sair</span>
-      </div>
+      </button>
     </div>
   );
 }

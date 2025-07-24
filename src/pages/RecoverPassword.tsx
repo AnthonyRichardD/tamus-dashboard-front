@@ -7,11 +7,16 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router';
+import adminServices from '@/services/admin.services';
+import { useAlertStore } from '@/store/DialogAlert';
+import { useLoadingStore } from '@/store/loadingStore';
+import { useNavigate } from 'react-router';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const formSchema = z
   .object({
@@ -31,6 +36,8 @@ const formSchema = z
   });
 
 const RecoverPassword = () => {
+  const { showLoading, hideLoading } = useLoadingStore();
+  const { showAlert } = useAlertStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: 'onChange',
@@ -41,8 +48,38 @@ const RecoverPassword = () => {
     },
   });
 
+  const navigate = useNavigate();
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('Formulário enviado:', values);
+    try {
+      showLoading();
+
+      const response = await adminServices.resetPassword({
+        code: values.verification_code, new_password: values.new_password
+      });
+
+      // Tratamento de sucesso
+      if (!response.is_error) {
+        // TODO: Salvar o token e gerenciar os estados
+        showAlert('Senha redefinida com sucesso!', 'success', response.message);
+        // Redirecionar para a página de login ou outra ação
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
+        return;
+      }
+      // Tratamento de erro conhecido (da API)
+      showAlert('Erro ao redefinir senha', 'error', response.message);
+    } catch (error) {
+      // Tratamento de erro inesperado
+      console.error('Erro na recuperação de senha:', error);
+      showAlert(
+        'Erro inesperado',
+        'error',
+        'Ocorreu um erro ao tentar recuperar a senha. Tente novamente mais tarde.'
+      );
+    } finally {
+      hideLoading();
+    }
   }
 
   return (
@@ -82,9 +119,9 @@ const RecoverPassword = () => {
               name="verification_code"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium mb-1">
+                  <label className="text-sm font-medium leading-none">
                     Código de Verificação
-                  </FormLabel>
+                  </label>
                   <FormControl>
                     <Input
                       placeholder="123456"
@@ -103,9 +140,9 @@ const RecoverPassword = () => {
               name="new_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium mb-1">
+                  <label className="text-sm font-medium leading-none">
                     Nova Senha
-                  </FormLabel>
+                  </label>
                   <FormControl>
                     <PasswordInput
                       placeholder="Digite sua nova senha"
@@ -123,9 +160,9 @@ const RecoverPassword = () => {
               name="confirm_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium mb-1">
+                  <label className="text-sm font-medium leading-none">
                     Confirmar Senha
-                  </FormLabel>
+                  </label>
                   <FormControl>
                     <PasswordInput
                       placeholder="Confirme sua nova senha"
@@ -139,32 +176,18 @@ const RecoverPassword = () => {
             />
 
             <div className="flex flex-col gap-3">
-              <button
+              <Button
+                className='h-10'
                 type="submit"
-                className="w-full mt-3 bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded font-medium cursor-pointer"
               >
                 Redefinir Senha
-              </button>
+              </Button>
 
               <Link
                 to="/login"
-                className="w-full mb-3 bg-white hover:bg-[#F4F4F5] text-gray-800 py-2 px-4 rounded border border-gray-200 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full mb-3 bg-white rounded-md hover:bg-[#F4F4F5] text-gray-800 py-2 px-4 h-10 leading-0 border font-medium text-sm border-gray-200 inline-flex items-center justify-center gap-2 cursor-pointer"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-arrow-left-icon lucide-arrow-left"
-                >
-                  <path d="m12 19-7-7 7-7" />
-                  <path d="M19 12H5" />
-                </svg>
+                <ArrowLeft size={14} />
                 Voltar para o login
               </Link>
             </div>
@@ -173,7 +196,7 @@ const RecoverPassword = () => {
       </div>
 
       <p className="mt-6 text-sm text-gray-500 text-center">
-        © 2025 Sistema de Agendamento de Saúde. Todos os direitos <br />{' '}
+        © 2025 Sistema de Agendamento de Saúde. Todos os direitos <br />
         reservados.
       </p>
     </div>
