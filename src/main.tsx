@@ -44,7 +44,7 @@ createRoot(document.getElementById("root")!).render(
             </Route>
 
             <Route path="/patients/editar/:id" element={<PatientUpdate />} />
-            <Route path="/lista-de-paciente" element={< PatientList />} />
+            <Route path="/paciente/lista" element={< PatientList />} />
 
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>
               <Route path="/admin/list" element={<AdminList />} />
