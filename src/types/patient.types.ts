@@ -23,3 +23,33 @@ export interface PaginatedResponse {
     limit_per_page: number;
   };
 }
+
+export interface GetPatientByIdResponse {
+  is_error: false;
+  patient?: Patient;
+}
+
+export interface Patient {
+  id: number;
+  cpf: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  birth_date: string;
+  health_conditions: string;
+  registration_date: string;
+  active: boolean;
+  addresses: PatientAddress[];
+}
+export interface PatientAddress {
+  id: number;
+  patient_id: number;
+  zip_code: string;
+  state: string;
+  city: string;
+  neighborhood: string;
+  street: string;
+  number: string;
+  active: boolean;
+  registration_date: string;
+}

@@ -1,11 +1,9 @@
 // src/services/patient.service.ts
+import { GetPatientByIdResponse } from '@/types/patient.types';
 import api from './api';
 import type { ApiError } from './api';
 import type { Patient, PaginatedResponse } from '@/types/patient.d.ts';
 
-/**
- * Busca pacientes com paginação.
- */
 export async function getPatients(
   page: number,
   limit: number
@@ -20,23 +18,19 @@ export async function getPatients(
   }
 }
 
-/**
- * Busca um paciente pelo ID.
- */
 export async function getPatientById(
-  patientId: string
-): Promise<Patient | ApiError> {
+  patientId: string | undefined
+): Promise<GetPatientByIdResponse | ApiError> {
   try {
-    const response: Patient = await api.get(`/patients/${patientId}`);
+    const response: GetPatientByIdResponse = await api.get(
+      `/patients/show/${patientId}`
+    );
     return response;
   } catch (error) {
     return error as ApiError;
   }
 }
 
-/**
- * Atualiza os dados de um paciente.
- */
 export async function updatePatient(
   patientId: string,
   patientData: Partial<Patient>

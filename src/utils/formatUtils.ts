@@ -10,3 +10,9 @@ export const isValidCPFFormat = (cpf: string | number): boolean => {
   const cleaned = cpf.toString().replace(/\D/g, '');
   return cleaned.length === 11;
 };
+
+export const formatPhone = (phone: string): string => {
+  return phone
+    .replace(/\D/g, '')
+    .replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
+};

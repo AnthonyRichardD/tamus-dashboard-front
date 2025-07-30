@@ -63,16 +63,21 @@ interface AdminListItem {
 }
 
 class AdminService {
-  async list(params?: ListParams): Promise<PaginatedResponse<AdminListItem> | ApiError> {
+  async list(
+    params?: ListParams
+  ): Promise<PaginatedResponse<AdminListItem> | ApiError> {
     try {
-      const response = await api.get<PaginatedResponse<AdminListItem>>('/admin/list', {
-        params: {
-          page: params?.page,
-          limit_per_page: params?.limit_per_page,
-          ...params?.filters,
-        },
-      });
-      return response.data; 
+      const response = await api.get<PaginatedResponse<AdminListItem>>(
+        '/admin/list',
+        {
+          params: {
+            page: params?.page,
+            limit_per_page: params?.limit_per_page,
+            ...params?.filters,
+          },
+        }
+      );
+      return response;
     } catch (error) {
       return error as ApiError;
     }
@@ -80,8 +85,11 @@ class AdminService {
 
   async login(loginData: UserLogin): Promise<UserLoginResponse | ApiError> {
     try {
-      const response = await api.post<UserLoginResponse>('/auth/login', loginData);
-      const data = response.data; 
+      const response = await api.post<UserLoginResponse>(
+        '/auth/login',
+        loginData
+      );
+      const data = response.data;
 
       return {
         token: data.token,
@@ -101,10 +109,14 @@ class AdminService {
     }
   }
 
-  async RecoverPasswordToken(email: string): Promise<{ token: string } | ApiError> {
+  async RecoverPasswordToken(
+    email: string
+  ): Promise<{ token: string } | ApiError> {
     try {
-      const response = await api.post<{ token: string }>('/admin/Recover', { email });
-      const data = response.data; 
+      const response = await api.post<{ token: string }>('/admin/Recover', {
+        email,
+      });
+      const data = response.data;
       localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
@@ -112,24 +124,33 @@ class AdminService {
     }
   }
 
-  async resetPassword(resetData: ResetPasswordRequest): Promise<ResetPasswordResponse | ApiError> {
+  async resetPassword(
+    resetData: ResetPasswordRequest
+  ): Promise<ResetPasswordResponse | ApiError> {
     try {
-      const response = await api.post<ResetPasswordResponse>('/admin/reset', resetData);
+      const response = await api.post<ResetPasswordResponse>(
+        '/admin/reset',
+        resetData
+      );
       return response.data;
     } catch (error) {
       return error as ApiError;
     }
   }
 
-  async createAdmin(adminData: CreateAdminRequest): Promise<CreateAdminResponse | ApiError> {
+  async createAdmin(
+    adminData: CreateAdminRequest
+  ): Promise<CreateAdminResponse | ApiError> {
     try {
-      const response = await api.post<CreateAdminResponse>('/admin/create', adminData);
+      const response = await api.post<CreateAdminResponse>(
+        '/admin/create',
+        adminData
+      );
       return response.data;
     } catch (error) {
       return error as ApiError;
     }
   }
 }
-
 
 export default new AdminService();
