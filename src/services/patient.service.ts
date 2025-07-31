@@ -1,5 +1,8 @@
 // src/services/patient.service.ts
-import { GetPatientByIdResponse } from '@/types/patient.types';
+import {
+  GetPatientByIdResponse,
+  PatientConsultationResponse,
+} from '@/types/patient.types';
 import api from './api';
 import type { ApiError } from './api';
 import type { Patient, PaginatedResponse } from '@/types/patient.d.ts';
@@ -24,6 +27,22 @@ export async function getPatientById(
   try {
     const response: GetPatientByIdResponse = await api.get(
       `/patients/show/${patientId}`
+    );
+    return response;
+  } catch (error) {
+    return error as ApiError;
+  }
+}
+
+export async function getConsultationsByPatient(
+  patientId: string | undefined
+): Promise<PatientConsultationResponse | ApiError> {
+  try {
+    const response: PatientConsultationResponse = await api.post(
+      `/patients/consult`,
+      {
+        patient_id: patientId,
+      }
     );
     return response;
   } catch (error) {

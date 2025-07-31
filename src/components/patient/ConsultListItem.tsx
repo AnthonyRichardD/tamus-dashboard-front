@@ -2,69 +2,88 @@ import React from 'react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { CalendarDays, Clock, ClipboardList } from 'lucide-react';
-import { Consultation, ConsultationStatus } from '../../types/patient';
+import { Consultation } from '@/types/patient.types';
+import moment from 'moment';
 
 interface ConsultListItemProps {
     consultation: Consultation;
 }
 
-const getConsultaBorderColor = (tipoConsulta: string) => {
-    if (tipoConsulta.includes("Retorno")) return "#4A90E2";
-    if (tipoConsulta.includes("Inicial")) return "#D0021B";
-    return "gray-300";
+const getCardBorder = (status: string) => {
+    switch (status) {
+        case 'completed':
+            return '#28A745';
+        case 'scheduled':
+            return '#007BFF';
+        case 'canceled':
+            return 'border-red-500';
+        default:
+            return '';
+    }
 };
 
-const getBadgeVariant = (status: ConsultationStatus) => {
+const getBadgeVariant = (status: 'scheduled' | 'completed' | 'canceled') => {
     switch (status) {
-        case 'Concluído':
+        case 'completed':
             return 'bg-[#28A745] text-white';
-        case 'Agendado':
+        case 'scheduled':
             return 'bg-[#007BFF] text-white';
-        case 'Cancelado':
+        case 'canceled':
             return 'bg-red-500 text-white';
         default:
             return '';
     }
 };
 
+const getTranlatedStatus = (status: 'scheduled' | 'completed' | 'canceled') => {
+    switch (status) {
+        case 'scheduled':
+            return 'Agendado';
+        case 'completed':
+            return 'Concluído';
+        case 'canceled':
+            return 'Cancelado';
+        default:
+            return '';
+    }
+};
+
 export const ConsultListItem: React.FC<ConsultListItemProps> = ({ consultation }) => {
-    const formattedDate = new Date(consultation.date + 'T00:00:00').toLocaleDateString('pt-BR');
-    const borderLeftColor = getConsultaBorderColor(consultation.type);
 
     return (
-        <Card className={`relative shadow-ultra-subtle mb-3 rounded-lg bg-white`}
+        <Card className={`relative shadow-ultra-subtle mb-3 rounded-lg bg-white gap-0`}
             style={{
                 border: '1px solid #E5E7EB',
-                borderLeft: `3px solid ${borderLeftColor}`,
                 padding: '8px 16px 8px 16px',
+                borderLeft: `4px solid ${getCardBorder(consultation.status)}`,
             }}>
-            <div className="flex justify-between items-center mb-0.5">
-                <h4 className="text-base font-semibold text-gray-800 leading-snug">{consultation.type}</h4> {/* leading-snug aqui */}
+
+            <h4 className="text-base font-semibold text-gray-800 leading-snug">{consultation.consultation_type.name}</h4>
+
+            <div className='flex items-center justify-between'>
+                <p className="text-sm text-gray-600 mb-0.5 leading-snug">
+                    {consultation.professional.name} - {consultation.professional.specialty}
+                </p>
                 <Badge className={`${getBadgeVariant(consultation.status)} text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap`}>
-                    {consultation.status}
+                    {getTranlatedStatus(consultation.status)}
                 </Badge>
             </div>
-
-            <p className="text-sm text-gray-600 mb-0.5 leading-snug">
-                Dr(a). {consultation.doctorName} - {consultation.specialty}
-            </p>
-
             <div className="flex items-center text-xs text-gray-500 gap-4 mb-0.5">
                 <div className="flex items-center">
-                    <CalendarDays className="mr-1 text-base text-gray-400" />
-                    {formattedDate}
+                    <CalendarDays width={16} className="mr-1 text-base text-gray-400" />
+                    {moment(consultation.slot.start_time).format('DD/MM/YYYY')}
                 </div>
                 <div className="flex items-center">
-                    <Clock className="mr-1 text-base text-gray-400" />
-                    {consultation.time}
+                    <Clock width={16} className="mr-1 text-base text-gray-400" />
+                    {moment(consultation.slot.start_time).format('HH:mm')} - {moment(consultation.slot.end_time).format('HH:mm')}
                 </div>
             </div>
 
-            {consultation.observacoes && (
-                <div className="flex items-start border-l-[3px] border-[#CCCCCC] px-3 py-1.5 rounded mt-1.5 text-sm">
-                    <ClipboardList className="text-gray-500 text-lg mr-2 flex-shrink-0 mt-0.5" />
+            {consultation.notes && (
+                <div className="flex items-center px-3 py-1.5 rounded-lg mt-1.5 text-sm bg-gray-100">
+                    <ClipboardList width={16} className="text-gray-500 text-lg mr-2 flex-shrink-0" />
                     <p className="text-gray-700 leading-snug">
-                        <span className="font-semibold text-gray-700">Observações:</span> {consultation.observacoes}
+                        <span className="font-semibold text-gray-700">Observações:</span> {consultation.notes}
                     </p>
                 </div>
             )}

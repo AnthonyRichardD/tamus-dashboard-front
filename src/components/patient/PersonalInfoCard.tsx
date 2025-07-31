@@ -5,6 +5,7 @@ import { Separator } from '../ui/separator';
 import { FiUser, FiMail, FiPhone, FiHeart, FiAlertCircle } from 'react-icons/fi';
 import { Patient } from '@/types/patient.types';
 import { formatCPF, formatPhone } from '@/utils/formatUtils';
+import { AddressCard } from './AddressCard';
 
 interface PersonalInfoCardProps {
     data: Patient;

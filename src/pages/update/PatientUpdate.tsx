@@ -58,7 +58,6 @@ export default function PatientUpdate() {
     setIsSaving(true);
     try {
       if (USE_MOCK) {
-        console.log("Mock save:", patient);
         await new Promise(resolve => setTimeout(resolve, 500));
       } else {
         // Agora o 'patient' que você envia tem o tipo exato que 'updatePatient' espera.
