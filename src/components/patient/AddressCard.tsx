@@ -17,12 +17,19 @@ export const AddressCard: React.FC<AddressCardProps> = ({ data }) => {
                     Endereço
                 </CardTitle>
             </CardHeader>
-            <CardContent className="text-sm">
-                <p className="mb-2"><span className="text-gray-500">CEP:</span> <span className="font-medium text-gray-800">{data.zip_code}</span></p>
-                <p className="mb-2"><span className="text-gray-500">Rua:</span> <span className="font-medium text-gray-800">{data.street}</span></p>
-                <p className="mb-2"><span className="text-gray-500">Bairro:</span> <span className="font-medium text-gray-800">{data.neighborhood}</span></p>
-                <p><span className="text-gray-500">Cidade:</span> <span className="font-medium text-gray-800">{data.city} - {data.state}</span></p>
-            </CardContent>
+            {
+                data ?
+                    <CardContent className="text-sm">
+                        <p className="mb-2"><span className="text-gray-500">CEP:</span> <span className="font-medium text-gray-800">{data.zip_code}</span></p>
+                        <p className="mb-2"><span className="text-gray-500">Rua:</span> <span className="font-medium text-gray-800">{data.street}</span></p>
+                        <p className="mb-2"><span className="text-gray-500">Bairro:</span> <span className="font-medium text-gray-800">{data.neighborhood}</span></p>
+                        <p><span className="text-gray-500">Cidade:</span> <span className="font-medium text-gray-800">{data.city} - {data.state}</span></p>
+                    </CardContent>
+                    :
+                    <CardContent className="text-sm">
+                        <p className="text-gray-500">Nenhum endereço cadastrado</p>
+                    </CardContent>
+            }
         </Card>
     );
 };

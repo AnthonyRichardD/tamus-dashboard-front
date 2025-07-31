@@ -93,10 +93,8 @@ export function PatientDetailsPage() {
                         <AddressCard data={patient?.addresses[0]} />
                     )}
                 </section>
-                {consultations && consultations.data.length > 0 && (
-                    <MedicalHistoryTabs consultations={consultations?.data} />
+                <MedicalHistoryTabs consultations={consultations?.data} />
 
-                )}
             </main>
         </div>
     );

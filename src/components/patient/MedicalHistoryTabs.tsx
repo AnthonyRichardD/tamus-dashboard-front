@@ -7,7 +7,6 @@ import { Consultation } from '@/types/patient.types';
 interface MedicalHistoryTabsProps { consultations: Consultation[] }
 
 export const MedicalHistoryTabs: React.FC<MedicalHistoryTabsProps> = ({ consultations }) => {
-    console.log(consultations)
     return (
         <div className="mt-8 bg-white p-6 rounded-lg shadow-sm-custom">
             <h2 className="text-2xl font-semibold text-gray-800 mb-1">Histórico Médico</h2>
@@ -34,9 +33,10 @@ export const MedicalHistoryTabs: React.FC<MedicalHistoryTabsProps> = ({ consulta
                         Exames
                     </TabsTrigger>
                 </TabsList>
+
                 <TabsContent value="consultas" className="mt-0">
 
-                    {consultations.length > 0 ? (
+                    {consultations && consultations.length > 0 ? (
 
                         consultations.map(consultation => (
                             <ConsultListItem key={consultation.id} consultation={
