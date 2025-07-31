@@ -47,7 +47,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/admin/create" element={<AdminCreationForm />} />
             </Route>
             <Route path="/patients/editar/:id" element={<PatientUpdate />} />
-            <Route path="/lista-de-paciente" element={<PatientList />} />
+            <Route path="/patient/list" element={<PatientList />} />
 
             {/* Somente para superadmin */}
             <Route element={<ProtectedRoute requiredRoles={['superadmin']} />}>

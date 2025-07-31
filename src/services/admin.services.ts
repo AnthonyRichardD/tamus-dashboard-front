@@ -62,6 +62,39 @@ interface AdminListItem {
   status: 'ACTIVE' | 'INACTIVE';
 }
 
+interface ResetPasswordRequest {
+  code: string;
+  new_password: string;
+}
+
+interface ResetPasswordResponse {
+  message: string;
+  is_error: boolean;
+}
+
+interface CreateAdminRequest {
+  full_name: string;
+  email: string;
+  role: string;
+  cpf: string;
+  phone: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  password: string;
+}
+
+interface CreateAdminResponse {
+  message: string;
+  is_error: boolean;
+}
+
+interface ListParams {
+  page?: number;
+  limit_per_page?: number;
+  filters?: {
+    [key: string]: string | number;
+  };
+}
+
 class AdminService {
   async list(
     params?: ListParams

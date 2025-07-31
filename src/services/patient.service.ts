@@ -1,4 +1,3 @@
-// src/services/patient.service.ts
 import {
   GetPatientByIdResponse,
   PatientConsultationResponse,
@@ -7,21 +6,30 @@ import api from './api';
 import type { ApiError } from './api';
 import type { Patient, PaginatedResponse } from '@/types/patient.d.ts';
 
-export async function getPatients(
-  page: number,
-  limit: number
-): Promise<PaginatedResponse<Patient> | ApiError> {
-  try {
-    const response: PaginatedResponse<Patient> = await api.get('/patients', {
-      params: { page, limit_per_page: limit },
-    });
-    return response;
-  } catch (error) {
-    return error as ApiError;
-  }
+interface ErrorResponse {
+  is_error: boolean;
+  message: string;
 }
 
-export async function getPatientById(
+class PatientService {
+  async list(page: number, limit: number): Promise<PaginatedResponse | ErrorResponse> {
+    try {
+      const response = await api.get('/patients/list', {
+        params: {
+          page,
+          limit_per_page: limit,
+        },
+      });
+      return response;
+    } catch (error: any) {
+      return {
+        is_error: true,
+        message: error.response?.data?.message || 'Erro ao buscar pacientes.',
+      };
+    }
+  }
+
+  async function getPatientById(
   patientId: string | undefined
 ): Promise<GetPatientByIdResponse | ApiError> {
   try {
@@ -34,7 +42,7 @@ export async function getPatientById(
   }
 }
 
-export async function getConsultationsByPatient(
+  async function getConsultationsByPatient(
   patientId: string | undefined
 ): Promise<PatientConsultationResponse | ApiError> {
   try {
@@ -50,13 +58,32 @@ export async function getConsultationsByPatient(
   }
 }
 
-export async function updatePatient(
-  patientId: string,
-  patientData: Partial<Patient>
-): Promise<void | ApiError> {
-  try {
-    await api.put(`/patients/${patientId}`, patientData);
-  } catch (error) {
-    return error as ApiError;
+  async getById(patientId: string): Promise<Paciente | ErrorResponse> {
+    try {
+      const response = await api.get(`/patients/${patientId}`);
+      return response.data.data;
+    } catch (error: any) {
+      return {
+        is_error: true,
+        message: error.response?.data?.message || 'Erro ao buscar dados do paciente.',
+      };
+    }
+  }
+
+  async update(patientId: string, patientData: Partial<Paciente>): Promise<{ message: string; is_error: boolean }> {
+    try {
+      const response = await api.put(`/patients/${patientId}`, patientData);
+      return {
+        message: response.data.message || 'Paciente atualizado com sucesso.',
+        is_error: false,
+      };
+    } catch (error: any) {
+      return {
+        is_error: true,
+        message: error.response?.data?.message || 'Erro ao atualizar paciente.',
+      };
+    }
   }
 }
+
+export default new PatientService();
