@@ -5,10 +5,10 @@ import { PersonalInfoCard } from './PersonalInfoCard';
 import { AddressCard } from './AddressCard';
 import { MedicalHistoryTabs } from './MedicalHistoryTabs';
 import { ArrowLeft as LuArrowLeft } from 'lucide-react';
-import { getConsultationsByPatient, getPatientById } from '../../services/patient.service';
 import { useAlertStore } from '@/store/DialogAlert';
 import { useLoadingStore } from '@/store/loadingStore';
 import { GetPatientByIdResponse, Patient, PatientConsultationResponse } from '@/types/patient.types';
+import patientService from '@/services/patient.service';
 
 export function PatientDetailsPage() {
     const { showAlert } = useAlertStore();
@@ -22,7 +22,7 @@ export function PatientDetailsPage() {
     const loadPatientData = async () => {
         try {
             showLoading();
-            const response = await getPatientById(id) as GetPatientByIdResponse;
+            const response = await patientService.getPatientById(id) as GetPatientByIdResponse;
 
             if (!response.is_error) {
                 setPatient(response.patient);
@@ -45,7 +45,7 @@ export function PatientDetailsPage() {
     const loadPatientConsultations = async () => {
         try {
             showLoading();
-            const response = await getConsultationsByPatient(id) as PatientConsultationResponse;
+            const response = await patientService.getConsultationsByPatient(id) as PatientConsultationResponse;
 
             if (!response.is_error) {
                 setConsultations(response);
