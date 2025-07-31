@@ -18,12 +18,12 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
 import NotFound404 from './pages/NotFound404.tsx';
 import ConultationDetails from './pages/ConsultationDetails.tsx';
-import { PatientList } from './pages/PatientList.tsx';
+import { PatientList } from './pages/patient/List.tsx';
 import PatientUpdate from "./pages/update/PatientUpdate.tsx";
 import "./index.css";
 
 
-import { PatientDetailsPage } from "./components/patient/PatientDetailsPage.tsx";
+import { PatientShow } from "./pages/patient/show.tsx";
 import { ExamListPage } from "./components/exams/ExamListPage.tsx";
 
 import { DialogAlert } from "./components/ui/dialogAlert.tsx";
@@ -54,7 +54,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/admin/list" element={<AdminList />} />
             </Route>
 
-            <Route path="/paciente/:id" element={<PatientDetailsPage />} />
+            <Route path="/paciente/:id" element={<PatientShow />} />
             <Route path="/exames" element={<ExamListPage />} />
           </Route>
 

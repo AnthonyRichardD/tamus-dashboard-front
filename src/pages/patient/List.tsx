@@ -15,7 +15,7 @@ import {
 import { DynamicTable, TableColumn } from "@/components/ui/dynamic-table";
 
 import { useAlertStore } from "@/store/DialogAlert";
-import PatientService from "../services/patient.service"; // Importa apenas o serviço
+import PatientService from "../../services/patient.service"; // Importa apenas o serviço
 import { Paciente } from "@/types/patient.types"; // Importa a interface Paciente de um local central
 
 import { formatCPF } from "@/utils/formatUtils";

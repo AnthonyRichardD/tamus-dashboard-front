@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { Button } from '../ui/button';
-import { PersonalInfoCard } from './PersonalInfoCard';
-import { AddressCard } from './AddressCard';
-import { MedicalHistoryTabs } from './MedicalHistoryTabs';
+import { Button } from '../../components/ui/button';
+import { PersonalInfoCard } from '../../components/patient/PersonalInfoCard';
+import { AddressCard } from '../../components/patient/AddressCard';
+import { MedicalHistoryTabs } from '../../components/patient/MedicalHistoryTabs';
 import { ArrowLeft as LuArrowLeft } from 'lucide-react';
 import { useAlertStore } from '@/store/DialogAlert';
 import { useLoadingStore } from '@/store/loadingStore';
 import { GetPatientByIdResponse, Patient, PatientConsultationResponse } from '@/types/patient.types';
 import patientService from '@/services/patient.service';
 
-export function PatientDetailsPage() {
+export function PatientShow() {
     const { showAlert } = useAlertStore();
     const { showLoading, hideLoading } = useLoadingStore();
     const navigate = useNavigate();
