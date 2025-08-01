@@ -49,7 +49,6 @@ const getTranlatedStatus = (status: 'scheduled' | 'completed' | 'canceled') => {
 };
 
 export const ConsultListItem: React.FC<ConsultListItemProps> = ({ consultation }) => {
-
     return (
         <Card className={`relative shadow-ultra-subtle mb-3 rounded-lg bg-white gap-0`}
             style={{

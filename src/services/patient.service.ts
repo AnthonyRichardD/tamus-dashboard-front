@@ -1,6 +1,7 @@
 import {
   GetPatientByIdResponse,
   PatientConsultationResponse,
+  PatientExamsResponse,
 } from '@/types/patient.types';
 import api from './api';
 import type { ApiError } from './api';
@@ -60,8 +61,20 @@ class PatientService {
       return error as ApiError;
     }
   }
+  async getExamsByPatient(
+    patientId: string | undefined
+  ): Promise<PatientExamsResponse | ApiError> {
+    try {
+      const response: PatientExamsResponse = await api.post(`/patients/exams`, {
+        patient_id: patientId,
+      });
+      return response;
+    } catch (error) {
+      return error as ApiError;
+    }
+  }
 
-  async getById(patientId: string): Promise<Paciente | ErrorResponse> {
+  async getById(patientId: string): Promise<Patient | ErrorResponse> {
     try {
       const response = await api.get(`/patients/${patientId}`);
       return response.data.data;
@@ -76,7 +89,7 @@ class PatientService {
 
   async update(
     patientId: string,
-    patientData: Partial<Paciente>
+    patientData: Partial<Patient>
   ): Promise<{ message: string; is_error: boolean }> {
     try {
       const response = await api.put(`/patients/${patientId}`, patientData);

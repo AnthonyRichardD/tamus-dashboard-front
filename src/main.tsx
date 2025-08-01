@@ -23,7 +23,7 @@ import PatientUpdate from "./pages/update/PatientUpdate.tsx";
 import "./index.css";
 
 
-import { PatientShow } from "./pages/patient/show.tsx";
+import { PatientShow } from "./pages/patient/Show.tsx";
 import { ExamListPage } from "./components/exams/ExamListPage.tsx";
 
 import { DialogAlert } from "./components/ui/dialogAlert.tsx";

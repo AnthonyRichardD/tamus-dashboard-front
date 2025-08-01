@@ -26,6 +26,7 @@ export interface PaginatedResponse {
 
 export interface GetPatientByIdResponse {
   is_error: false;
+  message: string;
   patient?: Patient;
 }
 
@@ -56,6 +57,8 @@ export interface PatientAddress {
 
 // BEGIN: PatientConsultationResponse
 export interface PatientConsultationResponse {
+  is_error: boolean;
+  message: string;
   data: Consultation[];
   pagination: Pagination;
 }
@@ -102,6 +105,49 @@ export interface ConsultationType {
   name: string;
   duration_minutes: number;
   active: boolean;
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+// BEGIN: PatientExamsResponse
+
+export interface PatientExamsResponse {
+  is_error: boolean;
+  message: string;
+  data: Exam[];
+  pagination: Pagination;
+}
+
+export interface Exam {
+  id: number;
+  status: 'scheduled' | 'completed' | 'canceled';
+  created_at: string;
+  exam_slot: ExamSlot;
+  requesting_doctor: RequestingDoctor;
+}
+
+export interface RequestingDoctor {
+  name: string;
+  specialty: string;
+}
+
+export interface ExamSlot {
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  location: string;
+  exam: Exam;
+}
+
+export interface Exam {
+  exam_type: string;
+  duration_minutes: number;
+  available_locations: string[];
 }
 
 export interface Pagination {
