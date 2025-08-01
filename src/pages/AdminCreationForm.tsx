@@ -13,7 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } 
 import { useLoadingStore } from "@/store/loadingStore";
 import adminServices from "@/services/admin.services";
 import { useAlertStore } from "@/store/DialogAlert";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 function generateRandomPassword(length = 10) {
   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

@@ -14,7 +14,7 @@ import { Link } from 'react-router';
 import adminServices from '@/services/admin.services';
 import { useAlertStore } from '@/store/DialogAlert';
 import { useLoadingStore } from '@/store/loadingStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 

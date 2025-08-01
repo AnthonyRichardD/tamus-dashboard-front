@@ -1,5 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router';
 
 interface ProtectedRouteProps {
     requiredRoles?: ('admin' | 'superadmin')[];

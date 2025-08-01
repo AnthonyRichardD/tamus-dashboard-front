@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 
 export default function NotFound404() {
