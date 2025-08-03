@@ -1,61 +1,78 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Consultation } from "@/types/consultation"
 import { formatDate, formatTimeRange } from "@/utils/dateUtils"
 import { User, Calendar, Clock, FileText } from "lucide-react"
-
-const statusConfig = {
-    completed: {
-        label: "Concluído",
-        color: "bg-green-100 text-green-800 hover:bg-green-100",
-        borderColor: "border-l-blue-500",
-    },
-    scheduled: {
-        label: "Agendado",
-        color: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-        borderColor: "border-l-red-500",
-    },
-    canceled: {
-        label: "Cancelado",
-        color: "bg-red-100 text-red-800 hover:bg-red-100",
-        borderColor: "border-l-gray-500",
-    },
-    no_show: {
-        label: "Faltou",
-        color: "bg-orange-100 text-orange-800 hover:bg-orange-100",
-        borderColor: "border-l-red-500",
-    },
-}
+import { Consultation, ConsultationStatus } from "@/types/consultation.types"
 
 export function ConsultationCard({ consultation, onViewDetails }: {
     consultation: Consultation
     onViewDetails: (consultationId: number) => void
 }) {
-    const config = statusConfig[consultation.status]
 
-    let borderColor = config.borderColor
-    if (consultation.status === "scheduled") {
-        
-        if (consultation.professional.color_code === "#e74c3c") {
-            borderColor = "border-l-red-500"
-        } else if (consultation.professional.color_code === "#2ecc71") {
-            borderColor = "border-l-green-500"
-        } else {
-            borderColor = "border-l-blue-500"
+    const getCardBorder = (status: string) => {
+        switch (status) {
+            case 'completed':
+                return '#28A745';
+            case 'scheduled':
+                return '#007BFF';
+            case 'canceled':
+                return '#e85445';
+            case 'no_show':
+                return '#f59e0b';
+            default:
+                return '';
         }
-    }
+    };
+
+    const getBadgeVariant = (status: ConsultationStatus) => {
+        switch (status) {
+            case 'completed':
+                return 'bg-[#28A745] text-white';
+            case 'scheduled':
+                return 'bg-[#007BFF] text-white';
+            case 'canceled':
+                return 'bg-red-500 text-white';
+            case 'no_show':
+                return 'bg-[#f59e0b] text-white';
+            default:
+                return '';
+        }
+    };
+
+    const getTranlatedStatus = (status: ConsultationStatus) => {
+        switch (status) {
+            case 'scheduled':
+                return 'Agendado';
+            case 'completed':
+                return 'Concluído';
+            case 'canceled':
+                return 'Cancelado';
+            default:
+                return '';
+        }
+    };
 
     return (
-        <Card className={`border-l-4 ${borderColor}`}>
-            <CardContent className="p-6">
+        <Card className={`relative shadow-ultra-subtle mb-3 rounded-lg bg-white gap-0`}
+            style={{
+                border: '1px solid #E5E7EB',
+                padding: '16px',
+                borderLeft: `4px solid ${getCardBorder(consultation.status)}`,
+            }}>
+            <CardContent className="p-0">
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
-                        <div className="mb-2 flex items-center gap-3">
-                            <h3 className="font-semibold text-gray-900">{consultation.patient.full_name} #{consultation.patient_id}</h3>
-                            <Badge className={config.color}>{config.label}</Badge>
-                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="mb-2 flex items-center gap-3">
+                                <h3 className="font-semibold text-gray-900">{consultation.patient.full_name}</h3>
+                                <Badge className={`${getBadgeVariant(consultation.status)} text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap`}>{getTranlatedStatus(consultation.status)}</Badge>
+                            </div>
+                            <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => onViewDetails(consultation.id)}>
+                                Ver Detalhes
+                            </Button>
 
+                        </div>
                         <p className="mb-4 text-sm text-gray-600">
                             {consultation.consultation_type.name} • {consultation.consultation_type.duration_minutes} minutos
                         </p>
@@ -75,34 +92,30 @@ export function ConsultationCard({ consultation, onViewDetails }: {
                             </div>
                         </div>
 
-                        {consultation.status === "completed" && consultation.notes && (
-                            <div className="rounded-lg bg-gray-50 p-3">
+                        {consultation && (
+                            <div className="rounded-lg bg-gray-50 p-2">
                                 <div className="flex items-start gap-2">
-                                    <FileText className="h-4 w-4 mt-0.5 text-gray-600" />
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900 mb-1">Observações:</div>
-                                        <div className="text-sm text-gray-700">{consultation.notes}</div>
+                                    <FileText width={16} className="text-gray-600" />
+                                    <div className="space-x-1">
+                                        <span className="text-sm font-semibold text-gray-900 mb-1">Observações:</span>
+                                        <span className="text-sm text-gray-700">{consultation.notes ?? 'Observações em andamento para teste de exibição'}</span>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {consultation.status === "canceled" && consultation.cancellation_reason && (
-                            <div className="rounded-lg bg-red-50 p-3">
+                            <div className="rounded-lg bg-red-50 p-2">
                                 <div className="flex items-start gap-2">
-                                    <FileText className="h-4 w-4 mt-0.5 text-red-600" />
-                                    <div>
-                                        <div className="text-sm font-medium text-red-900 mb-1">Motivo do Cancelamento:</div>
-                                        <div className="text-sm text-red-700">{consultation.cancellation_reason}</div>
+                                    <FileText width={16} className="text-red-600" />
+                                    <div className="space-x-1">
+                                        <span className="text-sm font-medium text-red-900 mb-1">Motivo do Cancelamento:</span>
+                                        <span className="text-sm text-red-700">{consultation.cancellation_reason}</span>
                                     </div>
                                 </div>
                             </div>
                         )}
                     </div>
-
-                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => onViewDetails(consultation.id)}>
-                        Ver Detalhes
-                    </Button>
                 </div>
             </CardContent>
         </Card>

@@ -1,111 +1,86 @@
-'use client';
-
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { isToday, isThisWeek } from '@/utils/dateUtils';
 import { StatisticsCards } from '@/components/ui/StatisticsCards';
 import { PeriodFilter } from '@/components/ui/PeriodFilter';
 import { ConsultationCard } from '@/components/ui/ConsultationCard';
 import consultationServices from '@/services/consultation.services';
 import { useEffect } from 'react';
-import { Consultation, ConsultationListResponse } from '@/types/consultation';
+export type FilterPeriod = 'today' | 'this_week' | 'all_period';
+
 import { useNavigate } from 'react-router';
-export type FilterPeriod = 'today' | 'this_week' | 'all';
+import { useAlertStore } from '@/store/DialogAlert';
+import { useLoadingStore } from '@/store/loadingStore';
+import { ConsultationDetailsResponse } from '@/types/consultation.types';
+
 
 export default function ConsultationDetails() {
+  const { showAlert } = useAlertStore();
+  const { showLoading, hideLoading } = useLoadingStore();
   const navigate = useNavigate();
-  const [activePeriod, setActivePeriod] = useState<FilterPeriod>('today');
-  const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [, setPagination] = useState<
-    ConsultationListResponse['pagination'] | null
-  >(null);
-  const [, setLoading] = useState(false);
-  const [, setError] = useState<string | null>(null);
-  const [filters] = useState<{ [key: string]: string | number } | undefined>(
-    undefined
-  );
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [activePeriod, setActivePeriod] = useState<FilterPeriod>('today');
+
+  const [content, setContent] = useState<ConsultationDetailsResponse>();
+
 
   const fetchConsultations = useCallback(
     async (customFilters?: { [key: string]: string | number }) => {
       try {
-        setLoading(true);
-        setError(null);
-
-        const response: ConsultationListResponse =
+        showLoading();
+        const response =
           await consultationServices.listConsultations({
             page: 1,
             limit_per_page: 10,
-            filters: customFilters || filters,
+            filters: customFilters,
+            period: activePeriod,
           });
 
-        setConsultations(response.data);
-        setPagination(response.pagination);
-      } catch (error: any) {
-        console.error('Erro ao buscar consultas:', {
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
-        });
-        setError(
-          error.message ||
-            'Não foi possível carregar as consultas. Tente novamente.'
+        if (!response.is_error) {
+          setContent(response);
+          return;
+        }
+
+        showAlert(
+          'Erro na listagem de consultas',
+          'error',
+          response.message
+        );
+
+      } catch (error) {
+        console.error('Erro ao :', error);
+        showAlert(
+          'Erro inesperado',
+          'error',
+          'Ocorreu um problema ao carregar os dados. Tente novamente mais tarde.'
         );
       } finally {
-        setLoading(false);
+        hideLoading();
       }
     },
-    [filters]
+    [activePeriod, showLoading, hideLoading, showAlert]
   );
 
   useEffect(() => {
     fetchConsultations();
-  }, [fetchConsultations]);
+  }, [activePeriod, fetchConsultations]);
 
-  const allFilteredConsultations = useMemo(() => {
-    return consultations.filter((consultation) => {
-      switch (activePeriod) {
-        case 'today':
-          return isToday(consultation.slot.start_time);
-        case 'this_week':
-          return isThisWeek(consultation.slot.start_time);
-        case 'all':
-          return true;
-        default:
-          return true;
-      }
-    });
-  }, [consultations, activePeriod]);
-
-  const filteredConsultations = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return allFilteredConsultations.slice(startIndex, endIndex);
-  }, [allFilteredConsultations, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(allFilteredConsultations.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-
-  const handlePeriodChange = (period: FilterPeriod) => {
-    setActivePeriod(period);
-    setCurrentPage(1);
-  };
-
-  const handleViewDetails = (consultationId: number) => {
-    alert(`Navegando para detalhes da consulta ${consultationId}`);
-  };
 
   const handleBackToDashboard = () => {
     navigate('/dashboard');
   };
 
+  const handlePeriod = (period: FilterPeriod) => {
+    setActivePeriod(period);
+  };
+
+  const handleDetails = (id: number) => {
+    console.log(id);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="w-full">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
@@ -125,31 +100,35 @@ export default function ConsultationDetails() {
           </Button>
         </div>
 
-        <StatisticsCards consultations={allFilteredConsultations} />
+        {
+          content &&
+          <StatisticsCards summary={content.summary} />
+        }
+
 
         <PeriodFilter
           activePeriod={activePeriod}
-          onPeriodChange={handlePeriodChange}
+          onPeriodChange={handlePeriod}
         />
 
         <div className="space-y-4">
-          {filteredConsultations.length === 0 ? (
+          {content?.data.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 Nenhuma consulta encontrada para o período selecionado.
               </p>
             </div>
           ) : (
-            filteredConsultations.map((consultation) => (
+            content?.data.map((consultation) => (
               <ConsultationCard
                 key={consultation.id}
                 consultation={consultation}
-                onViewDetails={handleViewDetails}
+                onViewDetails={handleDetails}
               />
             ))
           )}
         </div>
-
+        {/*
         {totalPages > 1 && (
           <div className="mt-8 flex items-center justify-between">
             <div className="text-sm text-gray-700">
@@ -314,7 +293,7 @@ export default function ConsultationDetails() {
               </Button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

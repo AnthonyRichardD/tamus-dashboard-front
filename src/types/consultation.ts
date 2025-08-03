@@ -68,4 +68,4 @@ export interface ConsultationListResponse {
   pagination: Pagination;
 }
 
-export type FilterPeriod = 'today' | 'this_week' | 'all';
+export type FilterPeriod = 'today' | 'this_week' | 'all_period';

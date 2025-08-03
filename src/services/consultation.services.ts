@@ -1,5 +1,5 @@
-import api from './api';
-import { ConsultationListResponse } from '@/types/consultation';
+import { ConsultationDetailsResponse } from '@/types/consultation.types';
+import api, { ApiError } from './api';
 
 interface ListParams {
   page?: number;
@@ -7,45 +7,31 @@ interface ListParams {
   filters?: {
     [key: string]: string | number;
   };
+  period?: 'today' | 'this_week' | 'all_period';
 }
 
 class ConsultationService {
-  async listConsultations(params?: ListParams): Promise<ConsultationListResponse> {
+  async listConsultations(
+    params?: ListParams
+  ): Promise<ConsultationDetailsResponse> {
     try {
-      const response = await api.get('/consultation', {
-        params: {
-          page: params?.page,
-          limit_per_page: params?.limit_per_page,
-          ...params?.filters,
-        },
-      });
-
-      const responseData = response.data;
-
-      if (Array.isArray(responseData)) {
-        return {
-          data: responseData,
-          pagination: {
-            total: responseData.length, 
-            page: params?.page || 1,
-            limit: params?.limit_per_page || 10,
-            total_pages: 1, 
+      const response: ConsultationDetailsResponse = await api.get(
+        '/consultation',
+        {
+          params: {
+            page: params?.page,
+            limit_per_page: params?.limit_per_page,
+            ...params?.filters,
+            period: params?.period,
           },
-        };
-      } else if (
-        responseData &&
-        Array.isArray(responseData.data) &&
-        typeof responseData.pagination === 'object' &&
-        responseData.pagination !== null
-      ) {
-        return responseData as ConsultationListResponse;
-      }
-
-      console.error('Estrutura inesperada da API:', responseData);
-      throw new Error('Dados inválidos da API');
+        }
+      );
+      return response;
     } catch (error: any) {
       console.error('Erro ao buscar consultas:', error);
-      throw new Error(error?.response?.data?.message || 'Erro ao buscar consultas');
+      throw new Error(
+        error?.response?.data?.message || 'Erro ao buscar consultas'
+      );
     }
   }
 }
