@@ -44,68 +44,76 @@ export function Pagination({
     if (totalPages <= 1) return null
 
     return (
-        <div className={`flex items-center justify-end gap-2 border-t p-2 ${className}`}>
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="h-8 w-8"
-            >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Página anterior</span>
-            </Button>
+        <div className={`flex items-center justify-between gap-2 border-t p-2 ${className}`}>
+            <div>
+                <span className="text-sm text-muted-foreground">
+                    Página {currentPage} de {totalPages}
+                </span>
+            </div>
+            <div className="flex items-center justify-between gap-2 p-2">
 
-            {startPage > 1 && (
-                <>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => onPageChange(1)}
-                        className="h-8 w-8"
-                    >
-                        1
-                    </Button>
-                    {startPage > 2 && <span className="px-2">...</span>}
-                </>
-            )}
-
-            {pages.map((page) => (
                 <Button
-                    key={page}
-                    variant={currentPage === page ? "secondary" : "outline"}
+                    variant="outline"
                     size="icon"
-                    onClick={() => onPageChange(page)}
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
                     className="h-8 w-8"
                 >
-                    {page}
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Página anterior</span>
                 </Button>
-            ))}
 
-            {endPage < totalPages && (
-                <>
-                    {endPage < totalPages - 1 && <span className="px-2">...</span>}
+                {startPage > 1 && (
+                    <>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => onPageChange(1)}
+                            className="h-8 w-8"
+                        >
+                            1
+                        </Button>
+                        {startPage > 2 && <span className="px-2">...</span>}
+                    </>
+                )}
+
+                {pages.map((page) => (
                     <Button
-                        variant="outline"
+                        key={page}
+                        variant={currentPage === page ? "secondary" : "outline"}
                         size="icon"
-                        onClick={() => onPageChange(totalPages)}
+                        onClick={() => onPageChange(page)}
                         className="h-8 w-8"
                     >
-                        {totalPages}
+                        {page}
                     </Button>
-                </>
-            )}
+                ))}
 
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="h-8 w-8"
-            >
-                <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">Próxima página</span>
-            </Button>
+                {endPage < totalPages && (
+                    <>
+                        {endPage < totalPages - 1 && <span className="px-2">...</span>}
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => onPageChange(totalPages)}
+                            className="h-8 w-8"
+                        >
+                            {totalPages}
+                        </Button>
+                    </>
+                )}
+
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="h-8 w-8"
+                >
+                    <ChevronRight className="h-4 w-4" />
+                    <span className="sr-only">Próxima página</span>
+                </Button>
+            </div>
         </div>
     )
 }
