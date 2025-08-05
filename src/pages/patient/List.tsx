@@ -53,9 +53,9 @@ const calculateAge = (birthDate: string): number => {
 export function PatientList() {
   const navigate = useNavigate();
   const { showAlert } = useAlertStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   const [patients, setPatients] = useState<Paciente[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,

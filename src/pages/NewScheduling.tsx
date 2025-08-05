@@ -1,83 +1,157 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback, useEffect, ReactNode } from "react"
 import { ArrowLeft, User, FileText, Search, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { mockPatients } from "@/data/mock-patients"
 import { useNavigate } from "react-router-dom"
-import { AppointmentType, Patient } from "@/types/patient"
+import { AppointmentType } from "@/types/patient"
 import { Save } from "lucide-react"
 import Step2Scheduling from "@/components/Step2Scheduling"
 import Step3DateTimeConfirmation from "@/components/Step3Scheduling"
+import { DynamicTable, TableColumn } from "@/components/ui/dynamic-table"
+import patientService from "@/services/patient.service"
+import { useAlertStore } from "@/store/DialogAlert"
+import { differenceInYears, parseISO, format } from "date-fns";
+import { formatCPF } from "@/utils/formatUtils"
+import { Paciente } from "@/types/patient.types"
 
 
 export default function AppointmentScheduling() {
     const navigate = useNavigate();
+    const { showAlert } = useAlertStore();
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [patients, setPatients] = useState<Paciente[]>([]);
     const [appointmentType, setAppointmentType] = useState<AppointmentType>(null)
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+    const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
     const [currentStep, setCurrentStep] = useState(1)
-    const [selectedProfessional, setSelectedProfessional] = useState("")
-    const [selectedConsultationType, setSelectedConsultationType] = useState("")
-    const [selectedExamType, setSelectedExamType] = useState("")
-    const [selectedDate, setSelectedDate] = useState("")
-    const [selectedTime, setSelectedTime] = useState("")
-    const [observations, setObservations] = useState("")
 
-    const filteredPatients = useMemo(() => {
-        if (!searchTerm) return mockPatients
+    // BEGIN: PatientList Logic
+    const columns: TableColumn<Paciente>[] = [
+        { label: "Nome", key: "full_name", sortable: true },
+        { label: "CPF", key: "cpf", sortable: false, slot: true },
+        { label: "Email", key: "email", sortable: true },
+        { label: "Telefone", key: "phone", sortable: false },
+        { label: "Idade", key: "birth_date", sortable: false, slot: true },
+        { label: "Status", key: "active", sortable: true, slot: true },
+        { label: "Data de Cadastro", key: "registration_date", sortable: true, slot: true },
+        { label: "Ações", key: "actions", sortable: false, slot: true, width: "100px" },
+    ];
 
-        const term = searchTerm.toLowerCase()
-        return mockPatients.filter(
-            (patient) =>
-                patient.name.toLowerCase().includes(term) ||
-                patient.cpf.includes(term) ||
-                patient.email.toLowerCase().includes(term) ||
-                patient.phone.includes(term),
-        )
-    }, [searchTerm])
+    const calculateAge = (birthDate: string): number => {
+        try {
+            return differenceInYears(new Date(), parseISO(birthDate));
+        } catch (error) {
+            console.error("Data de nascimento inválida:", birthDate, error);
+            return 0;
+        }
+    };
 
-    const canProceed =
-        currentStep === 1
-            ? appointmentType && selectedPatient
-            : currentStep === 2
-                ? appointmentType === "consulta"
-                    ? selectedProfessional && selectedConsultationType
-                    : selectedExamType
-                : selectedDate && selectedTime
+    const renderStatusBadge = (isActive: boolean): ReactNode => {
+        if (isActive) {
+            return <Badge className="bg-green-500 hover:bg-green-600">Ativo</Badge>;
+        }
+        return <Badge className="text-white bg-red-500 hover:bg-red-600">Inativo</Badge>;
+    };
 
-    const handlePatientSelect = (patient: Patient) => {
-        setSelectedPatient(patient)
-    }
+    const renderCell = useCallback((item: Paciente, column: TableColumn<Paciente>): ReactNode => {
+        const value = item[column.key as keyof Paciente];
+
+        switch (column.key) {
+            case "full_name":
+                return <span className="font-medium">{item.full_name}</span>;
+            case "cpf":
+                return formatCPF(item.cpf);
+            case "email":
+                return item.email;
+            case "phone":
+                return item.phone;
+            case "birth_date":
+                return `${calculateAge(item.birth_date)} anos`;
+            case "active":
+                return renderStatusBadge(item.active);
+            case "registration_date":
+                return item.registration_date ? format(parseISO(item.registration_date), "dd/MM/yyyy") : '';
+            case "actions":
+                return (
+                    <Button variant="default" onClick={() => setSelectedPatient(item)}>
+                        Selecionar
+                    </Button>
+                );
+            default:
+                return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+        }
+    }, []);
+
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit_per_page: 10,
+        total: 0,
+    });
+
+    const fetchPatients = useCallback(async (page: number = pagination.page, filters?: { [key: string]: string | number }) => {
+        setIsLoading(true);
+        try {
+            const response = await patientService.list(page, pagination.limit_per_page, filters);
+
+            if (!response.is_error) {
+                const paginatedResponse = response as { data: Paciente[], pagination: { total: number } };
+                setPatients(paginatedResponse.data);
+                setPagination(prev => ({
+                    ...prev,
+                    total: paginatedResponse.pagination.total,
+                    page: page,
+                }));
+            } else {
+                showAlert("Erro na Listagem", "error", response.message || "Falha ao carregar pacientes.");
+            }
+        } catch (err: any) {
+            const errorMessage = err.message || "Erro inesperado ao carregar pacientes.";
+            showAlert("Erro na Listagem", "error", errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [showAlert, pagination.page, pagination.limit_per_page]);
+
+    useEffect(() => {
+        fetchPatients();
+    }, [fetchPatients]);
+
+    const handlePageChange = (newPage: number) => {
+        fetchPatients(newPage);
+    };
+    // END: PatientList Logic
+
 
     const handleBackToDashboard = () => {
         navigate("/dashboard");
     }
 
     const handleNext = () => {
-        if (currentStep === 1 && canProceed) {
-            setCurrentStep(2)
-        } else if (currentStep === 2) {
-            const step2Complete =
-                appointmentType === "consulta" ? selectedProfessional && selectedConsultationType : selectedExamType
+        if (currentStep < 3) {
+            setCurrentStep(currentStep + 1)
+            return
+        }
 
-            if (step2Complete) {
-                setCurrentStep(3)
-            }
-        } else if (currentStep === 3) {
-            console.log("Confirming appointment with:", {
-                appointmentType,
-                selectedPatient,
-                selectedProfessional,
-                selectedConsultationType,
-                selectedExamType,
-                selectedDate,
-                selectedTime,
-                observations,
-            })
+        if (currentStep === 3) {
             alert("Agendamento confirmado com sucesso!")
         }
+
+
+        // if (currentStep === 1 && canProceed) {
+        //     setCurrentStep(2)
+        // } else if (currentStep === 2) {
+        //     const step2Complete =
+        //         appointmentType === "consulta" ? selectedProfessional && selectedConsultationType : selectedExamType
+
+        //     if (step2Complete) {
+        //         setCurrentStep(3)
+        //     }
+        // } else if (currentStep === 3) {
+        //     alert("Agendamento confirmado com sucesso!")
+        // }
     }
 
 
@@ -87,9 +161,18 @@ export default function AppointmentScheduling() {
         }
     }
 
+    const handleCancel = () => {
+        navigate('/dashboard');
+    }
+
+    const handleSearch = (value: string) => {
+        const filters = { cpf: value }
+        fetchPatients(1, filters)
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 p-6">
-            <div className="mx-auto max-w-8xl px-4">
+            <div className="w-full px-4">
                 <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Novo Agendamento</h1>
@@ -133,7 +216,7 @@ export default function AppointmentScheduling() {
                 </div>
 
                 <Card className="mb-6">
-                    <CardContent className="p-6">
+                    <CardContent className="">
                         {currentStep === 1 && (
                             <>
                                 <div className="mb-6">
@@ -199,17 +282,32 @@ export default function AppointmentScheduling() {
                                 </div>
 
                                 <div>
-                                    <h3 className="text-base font-medium text-gray-900 mb-4">Selecionar Paciente</h3>
+                                    {!selectedPatient && (
+                                        <div>
+                                            <h3 className="text-base font-medium text-gray-900 mb-4">Selecionar Paciente</h3>
 
-                                    <div className="relative mb-4">
-                                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                        <Input
-                                            placeholder="Buscar por nome, CPF, email ou telefone..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10"
-                                        />
-                                    </div>
+                                            <div className="flex w-full items-center justify-center gap-2 mb-4">
+                                                <div className="relative w-full">
+                                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                                    <Input
+                                                        placeholder="CPF"
+                                                        value={searchTerm}
+                                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                                        className="pl-10"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-[120px] h-[40px]"
+                                                    onClick={() => handleSearch(searchTerm)}
+                                                >
+                                                    Buscar
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {selectedPatient && (
                                         <Card className="mb-4 border-teal-200 bg-teal-50">
@@ -220,19 +318,14 @@ export default function AppointmentScheduling() {
                                                             <Check className="h-4 w-4" />
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-medium text-teal-900">{selectedPatient.name}</h4>
+                                                            <h4 className="font-medium text-teal-900">{selectedPatient.full_name}</h4>
                                                             <p className="text-sm text-teal-700">
-                                                                {selectedPatient.cpf} • {selectedPatient.age} anos
+                                                                {formatCPF(selectedPatient.cpf)} • {calculateAge(selectedPatient.birth_date)} anos
                                                                 <br />{selectedPatient.email}
                                                             </p>
-                                                            {selectedPatient.hasConditions && (
-                                                                <div className="mt-1">
-                                                                    <span className="text-xs text-teal-600">Condições: </span>
-                                                                    {selectedPatient.conditions.map((condition, index) => (
-                                                                        <Badge key={index} variant="secondary" className="mr-1 text-xs">
-                                                                            {condition}
-                                                                        </Badge>
-                                                                    ))}
+                                                            {selectedPatient.health_conditions && (
+                                                                <div className="mt-1 text-teal-700">
+                                                                    <span className="text-xs font-semibold">Condições: </span> <span className="text-xs">{selectedPatient.health_conditions} </span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -246,69 +339,19 @@ export default function AppointmentScheduling() {
                                     )}
 
                                     {!selectedPatient && (
-                                        <div className="rounded-lg border">
-                                            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                                                <table className="w-full">
-                                                    <thead className="bg-gray-50">
-                                                        <tr>
-                                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Nome
-                                                            </th>
-                                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                CPF
-                                                            </th>
-                                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Idade
-                                                            </th>
-                                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Telefone
-                                                            </th>
-                                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Condições
-                                                            </th>
-                                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Ação
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="bg-white divide-y divide-gray-200">
-                                                        {filteredPatients.map((patient) => (
-                                                            <tr key={patient.id} className="hover:bg-gray-50">
-                                                                <td className="px-4 py-4">
-                                                                    <div>
-                                                                        <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                                                                        <div className="text-sm text-gray-500">{patient.email}</div>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-4 py-4 text-sm text-gray-900">{patient.cpf}</td>
-                                                                <td className="px-4 py-4 text-sm text-gray-900">{patient.age} anos</td>
-                                                                <td className="px-4 py-4 text-sm text-gray-900">{patient.phone}</td>
-                                                                <td className="px-4 py-4">
-                                                                    {patient.hasConditions ? (
-                                                                        <span className="text-sm text-green-600">Sim</span>
-                                                                    ) : (
-                                                                        <span className="text-sm text-gray-500">-</span>
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-0 py-4">
-                                                                    <Button className="cursor-pointer" variant="outline" onClick={() => handlePatientSelect(patient)}>
-                                                                        Selecionar
-                                                                    </Button>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            {filteredPatients.length === 0 && (
-                                                <div className="text-center py-8 text-gray-500">Nenhum paciente encontrado</div>
-                                            )}
-
-                                            <div className="px-4 py-3 bg-gray-50 text-sm text-gray-700">
-                                                {filteredPatients.length} paciente(s) encontrado(s)
-                                            </div>
-                                        </div>
+                                        <DynamicTable
+                                            columns={columns}
+                                            data={patients}
+                                            renderCell={renderCell}
+                                            emptyMessage="Nenhum paciente encontrado."
+                                            isLoading={isLoading}
+                                            pagination={{
+                                                currentPage: pagination.page,
+                                                itemsPerPage: pagination.limit_per_page,
+                                                totalItems: pagination.total,
+                                                onPageChange: handlePageChange,
+                                            }}
+                                        />
                                     )}
                                 </div>
                             </>
@@ -317,12 +360,10 @@ export default function AppointmentScheduling() {
                         {currentStep === 2 && (
                             <Step2Scheduling
                                 appointmentType={appointmentType}
-                                selectedProfessional={selectedProfessional}
-                                selectedConsultationType={selectedConsultationType}
-                                selectedExamType={selectedExamType}
-                                onProfessionalChange={setSelectedProfessional}
-                                onConsultationTypeChange={setSelectedConsultationType}
-                                onExamTypeChange={setSelectedExamType}
+                                onNext={handleNext}
+                                onPrevious={handlePrevious}
+                                onCancel={handleCancel}
+                                currentStep={currentStep}
                             />
                         )}
 
@@ -330,43 +371,28 @@ export default function AppointmentScheduling() {
                             <Step3DateTimeConfirmation
                                 appointmentType={appointmentType}
                                 selectedPatient={selectedPatient}
-                                selectedDate={selectedDate}
-                                selectedTime={selectedTime}
-                                observations={observations}
-                                onDateChange={setSelectedDate}
-                                onTimeChange={setSelectedTime}
-                                onObservationsChange={setObservations}
+                                onNext={handleNext}
+                                onPrevious={handlePrevious}
+                                onCancel={handleCancel}
+                                currentStep={currentStep}
                             />
                         )}
 
                     </CardContent>
-                    <div className="flex justify-between px-6">
-                        <div>
-                            {currentStep > 1 && (
-                                <Button className="cursor-pointer" variant="outline" onClick={handlePrevious}>
-                                    Anterior
+                    {currentStep == 1 && (
+
+                        <div className="flex justify-end px-6">
+                            <div className="flex space-x-3">
+                                <Button className="cursor-pointer" variant="outline">Cancelar</Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={handleNext}
+                                >
+                                    Próximo
                                 </Button>
-                            )}
+                            </div>
                         </div>
-                        <div className="flex space-x-3">
-                            <Button className="cursor-pointer" variant="outline">Cancelar</Button>
-                            <Button
-                                variant="primary"
-                                onClick={handleNext}
-                                disabled={!canProceed}
-                                className={canProceed ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}
-                            >
-                                {currentStep === 3 ? (
-                                    <>
-                                        <Save/>
-                                        Confirmar Agendamento
-                                    </>
-                                ) : (
-                                    "Próximo"
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+                    )}
 
                 </Card>
 

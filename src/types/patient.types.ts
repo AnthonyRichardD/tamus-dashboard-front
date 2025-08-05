@@ -8,8 +8,9 @@ export interface Paciente {
   email: string;
   phone: string;
   birth_date: string;
-  status: 'active' | 'inactive'; // Tipo específico
+  status: 'active' | 'inactive';
   registration_date: string;
+  health_conditions: string;
 }
 
 /**

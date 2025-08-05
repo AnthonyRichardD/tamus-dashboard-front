@@ -5,7 +5,7 @@ import { DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-
 import { Edit, MoreHorizontal, Trash2, UserPlus } from "lucide-react"
 import { DynamicTable, TableColumn } from "@/components/ui/dynamic-table"
 import { ReactNode, useEffect, useState } from "react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import moment from "moment"
 import { useAlertStore } from "@/store/DialogAlert"
 import adminServices from "@/services/admin.services"
@@ -31,6 +31,7 @@ export function AdminList() {
         limit_per_page: 10,
         total: 0
     })
+    const navigate = useNavigate();
     const [filters, setFilters] = useState({})
 
     async function getAdminList(page = 1) {
@@ -174,7 +175,7 @@ export function AdminList() {
                     <h1 className="text-2xl font-bold tracking-tight">Administradores</h1>
                     <p className="text-muted-foreground">Gerencie os administradores do sistema de agendamento.</p>
                 </div>
-                <Button className="w-fit bg-black text-white hover:bg-black/90">
+                <Button onClick={() => navigate("/admin/create")} className="w-fit bg-black text-white hover:bg-black/90">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Novo Administrador
                 </Button>

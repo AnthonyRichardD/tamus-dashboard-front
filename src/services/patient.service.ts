@@ -15,14 +15,16 @@ interface ErrorResponse {
 class PatientService {
   async list(
     page: number,
-    limit: number
+    limit: number,
+    filters?: { [key: string]: string | number }
   ): Promise<PaginatedResponse | ErrorResponse> {
     try {
-      const response = await api.get('/patients/list', {
+      const response = await api.post('/patients/list', {
         params: {
           page,
           limit_per_page: limit,
         },
+        filters,
       });
       return response;
     } catch (error: any) {
