@@ -46,7 +46,7 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<DashboardLayout />}>
             <Route path="/detalhes-consulta" element={<ConultationDetails />} />
             <Route path="/agendamento" element={<NewScheduling />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/detalhes-consulta" element={<ConultationDetails />} />
             <Route
               element={
@@ -66,9 +66,6 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/paciente/:id" element={<PatientShow />} />
             <Route path="/exames" element={<ExamListPage />} />
           </Route>
-
-          {/* Página padrão */}
-          <Route path="/" element={<App />} />
 
           {/* Rota para páginas não encontradas */}
           <Route path="*" element={<NotFound404 />} />
