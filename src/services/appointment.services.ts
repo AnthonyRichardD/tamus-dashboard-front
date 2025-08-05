@@ -34,6 +34,41 @@ class AppointmentService {
       return error as ApiError;
     }
   }
+
+  async getProfessionalsAvaliableDays(professionalId: number) {
+    try {
+      const response = await api.get(
+        `/professionals/${professionalId}/available-days`
+      );
+      return response;
+    } catch (error) {
+      return error as ApiError;
+    }
+  }
+  async getProfessionalAvailableTime(professionalId: number, date: string) {
+    try {
+      const response = await api.get(
+        `/professionals/${professionalId}/available-slots`,
+        {
+          params: {
+            date: date,
+          },
+        }
+      );
+      return response;
+    } catch (error) {
+      return error as ApiError;
+    }
+  }
+
+  async create(data) {
+    try {
+      const response = await api.post('/appointments/create', data);
+      return response;
+    } catch (error) {
+      return error as ApiError;
+    }
+  }
 }
 
 export default new AppointmentService();

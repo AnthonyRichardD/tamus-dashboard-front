@@ -3,8 +3,15 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Calendar, Clock } from 'lucide-react'
-import { Input } from "@/components/ui/input"
+import { Calendar as CalendarIcon, Clock } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import moment from "moment"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,15 +20,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { dateTimeConfirmationSchema, type DateTimeConfirmationFormData } from "@/lib/schemas/thirdStepValidations"
 import StepNavigation from "./appointment/StepNavigation"
 import { Paciente } from "@/types/patient.types"
+import appointmentServices from "@/services/appointment.services"
 
-// Tipos locais
 export type AppointmentType = "consulta" | "exame"
 
-export interface Patient {
-    id: string
-    name: string
-    email: string
-    phone: string
+interface TimeSlot {
+    slot_id: number;
+    start_time: string;
+    end_time: string;
 }
 
 export interface Step3DateTimeConfirmationProps {
@@ -32,8 +38,8 @@ export interface Step3DateTimeConfirmationProps {
     observations: string
     currentStep?: number
     totalSteps?: number
-    onDateChange?: (date: string) => void
-    onTimeChange?: (time: string) => void
+    professionalId: number
+    onSlotChange?: (time: string) => void
     onObservationsChange?: (observations: string) => void
     onValidationChange?: (isValid: boolean) => void
     onNext?: () => void
@@ -47,10 +53,10 @@ export default function Step3DateTimeConfirmation({
     selectedDate = "",
     selectedTime = "",
     observations = "",
+    professionalId,
     currentStep = 3,
     totalSteps = 3,
-    onDateChange,
-    onTimeChange,
+    onSlotChange,
     onObservationsChange,
     onValidationChange,
     onNext,
@@ -58,117 +64,106 @@ export default function Step3DateTimeConfirmation({
     onCancel,
 }: Step3DateTimeConfirmationProps) {
     const [showTimeField, setShowTimeField] = useState(false)
-
-    // Mock de horários disponíveis (local)
-    const mockAvailableTimes = [
-        "08:00",
-        "08:30",
-        "09:00",
-        "09:30",
-        "10:00",
-        "10:30",
-        "11:00",
-        "11:30",
-        "14:00",
-        "14:30",
-        "15:00",
-        "15:30",
-        "16:00",
-        "16:30",
-        "17:00",
-        "17:30",
-    ]
+    const [availableDates, setAvailableDates] = useState<string[]>([])
+    const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([])
+    const [isLoadingTimes, setIsLoadingTimes] = useState(false)
 
     const form = useForm<DateTimeConfirmationFormData>({
         resolver: zodResolver(dateTimeConfirmationSchema),
-        defaultValues: {
-            selectedDate,
-            selectedTime,
-            observations,
-        },
+        defaultValues: { selectedDate, selectedTime, observations },
         mode: "onChange",
     })
 
-    const { watch, formState, setValue, trigger } = form
+    const { watch, formState, setValue } = form
     const watchedDate = watch("selectedDate")
+    const watchedTimeId = watch("selectedTime")
 
-    // Controla a visibilidade do campo de horário baseado na data selecionada
     useEffect(() => {
-        setShowTimeField(!!watchedDate)
-        // Limpa o horário selecionado se a data for alterada
-        if (!watchedDate && selectedTime) {
-            setValue("selectedTime", "")
-            if (onTimeChange) {
-                onTimeChange("")
+        const getProfessionalDays = async () => {
+            if (!professionalId) return;
+            try {
+                const response = await appointmentServices.getProfessionalsAvaliableDays(professionalId)
+                if (response && !response.is_error) {
+                    setAvailableDates(response)
+                }
+            } catch (error) {
+                console.error("Erro ao buscar dias disponíveis:", error)
             }
         }
-    }, [watchedDate, selectedTime, setValue, onTimeChange])
+        getProfessionalDays()
+    }, [professionalId])
 
-    // Sincroniza com as props do componente pai
+    useEffect(() => {
+        const fetchTimes = async () => {
+            if (!watchedDate) {
+                setShowTimeField(false);
+                setAvailableTimes([]);
+                return;
+            }
+
+            setShowTimeField(true);
+            setIsLoadingTimes(true);
+            setAvailableTimes([]);
+
+            try {
+                const response = await appointmentServices.getProfessionalAvailableTime(professionalId, watchedDate);
+                if (response && !response.is_error) {
+                    setAvailableTimes(response);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar horários disponíveis:", error);
+                setAvailableTimes([]);
+            } finally {
+                setIsLoadingTimes(false);
+            }
+        };
+
+        fetchTimes();
+    }, [watchedDate, professionalId, setValue, onSlotChange]);
+
+
     useEffect(() => {
         setValue("selectedDate", selectedDate)
         setValue("selectedTime", selectedTime)
         setValue("observations", observations)
     }, [selectedDate, selectedTime, observations, setValue])
 
-    // Comunica o estado de validação para o componente pai
     useEffect(() => {
-        if (onValidationChange) {
-            onValidationChange(formState.isValid)
-        }
+        onValidationChange?.(formState.isValid)
     }, [formState.isValid, onValidationChange])
 
-    const handleDateChange = (value: string) => {
-        setValue("selectedDate", value)
-        if (onDateChange) {
-            onDateChange(value)
+
+    const availableDatesSet = new Set(availableDates);
+    const isDateDisabled = (date: Date) => {
+        if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
+            return true;
         }
-        trigger("selectedDate")
-    }
+        const formattedDate = format(date, "yyyy-MM-dd");
+        return !availableDatesSet.has(formattedDate);
+    };
 
     const handleTimeChange = (value: string) => {
-        setValue("selectedTime", value)
-        if (onTimeChange) {
-            onTimeChange(value)
-        }
-        trigger("selectedTime")
+        setValue("selectedTime", value, { shouldValidate: true })
+        onSlotChange?.(value)
     }
 
-    const handleObservationsChange = (value: string) => {
-        setValue("observations", value)
-        if (onObservationsChange) {
-            onObservationsChange(value)
-        }
+    const handleObservationsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        console.log('observações No step 3:', e.target.value)
+        setValue("observations", e.target.value)
+        onObservationsChange?.(e.target.value)
     }
 
-    const formatDate = (dateString: string) => {
-        if (!dateString) return ""
-        const date = new Date(dateString)
-        return date.toLocaleDateString("pt-BR")
-    }
+    const handleNext = () => formState.isValid && onNext?.()
+    const handlePrevious = () => onPrevious?.()
+    const handleCancel = () => onCancel?.()
 
-    const today = new Date().toISOString().split("T")[0]
-
-
-    const handleNext = () => {
-        if (formState.isValid && onNext) {
-            onNext()
+    let displayTime = "Não selecionado";
+    if (watchedTimeId && availableTimes.length > 0) {
+        const selectedSlot = availableTimes.find(slot => String(slot.slot_id) === watchedTimeId);
+        if (selectedSlot) {
+            displayTime = moment(selectedSlot.start_time).format("HH:mm");
         }
     }
-
-    const handlePrevious = () => {
-        if (onPrevious) {
-            onPrevious()
-        }
-    }
-
-    const handleCancel = () => {
-        if (onCancel) {
-            onCancel()
-        }
-    }
-
-    console.log(selectedPatient)
 
     return (
         <div className="space-y-6">
@@ -185,53 +180,70 @@ export default function Step3DateTimeConfirmation({
                             control={form.control}
                             name="selectedDate"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-sm font-medium">
-                                        Data <span className="text-destructive">*</span>
-                                    </FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input
-                                                type="date"
-                                                value={field.value || ""}
-                                                onChange={(e) => handleDateChange(e.target.value)}
-                                                className="pl-10"
-                                                min={today}
+                                <FormItem className="flex flex-col">
+                                    <FormLabel className="text-sm font-medium">Data <span className="text-destructive">*</span></FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                                                >
+                                                    {field.value ? (format(new Date(field.value), "PPP", { locale: ptBR })) : (<span>Escolha uma data</span>)}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                locale={ptBR}
+                                                selected={field.value ? new Date(field.value) : undefined}
+                                                onSelect={(date) => { if (date) { field.onChange(format(date, "yyyy-MM-dd")); } }}
+                                                disabled={isDateDisabled}
+                                                initialFocus
                                             />
-                                        </div>
-                                    </FormControl>
+                                        </PopoverContent>
+                                    </Popover>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
-                        {/* Campo de Horário - Só aparece após selecionar data */}
-                        {showTimeField && (
+                        {/* --- CAMPO DE HORÁRIO MODIFICADO --- */}
+                        {showTimeField ? (
                             <div className="animate-in slide-in-from-top-2 duration-300">
                                 <FormField
                                     control={form.control}
                                     name="selectedTime"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-sm font-medium">
-                                                Horário <span className="text-destructive">*</span>
-                                            </FormLabel>
-                                            <Select value={field.value || ""} onValueChange={handleTimeChange}>
+                                            <FormLabel className="text-sm font-medium">Horário <span className="text-destructive">*</span></FormLabel>
+                                            <Select
+                                                value={field.value || ""}
+                                                onValueChange={handleTimeChange}
+                                                disabled={isLoadingTimes}
+                                            >
                                                 <FormControl>
                                                     <div className="relative">
                                                         <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
                                                         <SelectTrigger className="pl-10">
-                                                            <SelectValue placeholder="Selecione um horário" />
+                                                            <SelectValue placeholder={isLoadingTimes ? "Carregando..." : "Selecione um horário"} />
                                                         </SelectTrigger>
                                                     </div>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {mockAvailableTimes.map((time) => (
-                                                        <SelectItem key={time} value={time}>
-                                                            {time}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {!isLoadingTimes && availableTimes.length === 0 && (
+                                                        <p className="p-4 text-sm text-muted-foreground">Nenhum horário disponível.</p>
+                                                    )}
+                                                    {availableTimes.map((time) => {
+                                                        const formattedTime = moment(time.start_time).format("HH:mm");
+                                                        return (
+                                                            <SelectItem key={time.slot_id} value={String(time.slot_id)}>
+                                                                {formattedTime}
+                                                            </SelectItem>
+                                                        )
+                                                    })}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -239,14 +251,9 @@ export default function Step3DateTimeConfirmation({
                                     )}
                                 />
                             </div>
-                        )}
-
-                        {/* Placeholder quando horário não está visível */}
-                        {!showTimeField && (
+                        ) : (
                             <div className="space-y-2">
-                                <FormLabel className="text-sm font-medium text-muted-foreground">
-                                    Horário <span className="text-destructive">*</span>
-                                </FormLabel>
+                                <FormLabel className="text-sm font-medium text-muted-foreground">Horário <span className="text-destructive">*</span></FormLabel>
                                 <div className="relative">
                                     <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <div className="w-full pl-10 pr-3 py-2 border border-input rounded-md bg-muted text-muted-foreground text-sm">
@@ -267,8 +274,8 @@ export default function Step3DateTimeConfirmation({
                                 <FormControl>
                                     <Textarea
                                         placeholder="Adicione observações sobre o agendamento..."
-                                        value={field.value || ""}
-                                        onChange={(e) => handleObservationsChange(e.target.value)}
+                                        {...field}
+                                        onChange={handleObservationsChange}
                                         rows={3}
                                         className="resize-none"
                                     />
@@ -292,34 +299,25 @@ export default function Step3DateTimeConfirmation({
                                     {appointmentType === "consulta" ? "Consulta" : "Exame"}
                                 </Badge>
                             </div>
-
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-muted-foreground">Paciente:</span>
-                                <span className="text-sm text-foreground font-medium">
-                                    {selectedPatient?.full_name || "Não selecionado"}
-                                </span>
+                                <span className="text-sm text-foreground font-medium">{selectedPatient?.full_name || "Não selecionado"}</span>
                             </div>
-
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-muted-foreground">Data:</span>
                                 <span className="text-sm text-foreground font-medium">
-                                    {selectedDate ? formatDate(selectedDate) : "Não selecionada"}
+                                    {watchedDate ? format(new Date(watchedDate), "P", { locale: ptBR }) : "Não selecionada"}
                                 </span>
                             </div>
-
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-muted-foreground">Horário:</span>
-                                <span className="text-sm text-foreground font-medium">
-                                    {selectedTime || "Não selecionado"}
-                                </span>
+                                {/* --- CORREÇÃO FINAL: USA A VARIÁVEL DE EXIBIÇÃO --- */}
+                                <span className="text-sm text-foreground font-medium">{displayTime}</span>
                             </div>
-
-                            {observations && (
+                            {watch("observations") && (
                                 <div className="space-y-1">
                                     <span className="text-sm font-medium text-muted-foreground block">Observações:</span>
-                                    <p className="text-sm text-foreground bg-background p-2 rounded border">
-                                        {observations}
-                                    </p>
+                                    <p className="text-sm text-foreground bg-background p-2 rounded border">{watch("observations")}</p>
                                 </div>
                             )}
                         </div>

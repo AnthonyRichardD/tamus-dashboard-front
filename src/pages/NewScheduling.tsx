@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, ReactNode } from "react"
+import { useState, useCallback, useEffect, ReactNode } from "react"
 import { ArrowLeft, User, FileText, Search, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
 import { AppointmentType } from "@/types/patient"
-import { Save } from "lucide-react"
 import Step2Scheduling from "@/components/Step2Scheduling"
 import Step3DateTimeConfirmation from "@/components/Step3Scheduling"
 import { DynamicTable, TableColumn } from "@/components/ui/dynamic-table"
@@ -15,6 +14,7 @@ import { useAlertStore } from "@/store/DialogAlert"
 import { differenceInYears, parseISO, format } from "date-fns";
 import { formatCPF } from "@/utils/formatUtils"
 import { Paciente } from "@/types/patient.types"
+import appointmentServices from "@/services/appointment.services"
 
 
 export default function AppointmentScheduling() {
@@ -136,22 +136,8 @@ export default function AppointmentScheduling() {
         }
 
         if (currentStep === 3) {
-            alert("Agendamento confirmado com sucesso!")
+            createNewScheduling();
         }
-
-
-        // if (currentStep === 1 && canProceed) {
-        //     setCurrentStep(2)
-        // } else if (currentStep === 2) {
-        //     const step2Complete =
-        //         appointmentType === "consulta" ? selectedProfessional && selectedConsultationType : selectedExamType
-
-        //     if (step2Complete) {
-        //         setCurrentStep(3)
-        //     }
-        // } else if (currentStep === 3) {
-        //     alert("Agendamento confirmado com sucesso!")
-        // }
     }
 
 
@@ -188,6 +174,37 @@ export default function AppointmentScheduling() {
     const [selectedProfessional, setSelectedProfessional] = useState<string>()
     const handleProfessionalChange = (value: string) => {
         setSelectedProfessional(value)
+    }
+
+    const [selectedNote, setSelectedNote] = useState<string>()
+    const handleNoteChange = (value: string) => {
+        console.log('observações no PAi:', value)
+        setSelectedNote(value)
+    }
+
+    const [selectedSlot, setSelectedSlot] = useState<string>()
+    const handleSlotChange = (value: string) => {
+        console.log('slot no PAi:', value)
+        setSelectedSlot(value)
+    }
+
+    const createNewScheduling = async () => {
+        try {
+            const response = await appointmentServices.create({
+                patient_id: Number(selectedPatient?.id),
+                professional_id: Number(selectedProfessional),
+                consultation_type_id: Number(selectedConsultationType),
+                slot_id: Number(selectedSlot),
+                notes: selectedNote
+            })
+
+            if (!response.is_error) {
+                console.log(response)
+            }
+        }
+        catch (error) {
+            console.error(error)
+        }
     }
 
     return (
@@ -393,6 +410,9 @@ export default function AppointmentScheduling() {
                             <Step3DateTimeConfirmation
                                 appointmentType={appointmentType}
                                 selectedPatient={selectedPatient}
+                                professionalId={selectedProfessional}
+                                onObservationsChange={handleNoteChange}
+                                onSlotChange={handleSlotChange}
                                 onNext={handleNext}
                                 onPrevious={handlePrevious}
                                 onCancel={handleCancel}

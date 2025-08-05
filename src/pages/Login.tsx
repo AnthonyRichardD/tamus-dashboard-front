@@ -14,7 +14,6 @@ import { Activity, LogIn } from 'lucide-react';
 import { Link } from 'react-router';
 import { PasswordInput } from '@/components/ui/password-input';
 
-// Stores
 import { useAlertStore } from '@/store/DialogAlert';
 import { useLoadingStore } from '@/store/loadingStore';
 import { useAuth } from '@/context/AuthContext';

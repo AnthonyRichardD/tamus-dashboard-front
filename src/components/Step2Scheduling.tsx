@@ -7,7 +7,6 @@ import { serviceSelectionSchema, type ServiceSelectionFormData } from "@/lib/sch
 import StepNavigation from "./appointment/StepNavigation"
 import appointmentServices from "@/services/appointment.services"
 
-// Definições de tipos
 export type AppointmentType = "consulta" | "exame"
 
 export interface Step2ServiceSelectionProps {
@@ -53,14 +52,12 @@ export default function Step2ServiceSelection({
   const watchedConsultationType = watch("selectedConsultationType")
   const watchedAppointmentType = watch("appointmentType")
 
-  // Sincroniza com as props do componente pai
   useEffect(() => {
     setValue("appointmentType", appointmentType)
     setValue("selectedConsultationType", selectedConsultationType)
     setValue("selectedProfessional", selectedProfessional)
   }, [appointmentType, selectedConsultationType, selectedProfessional, setValue])
 
-  // Limpa o profissional quando o tipo de consulta muda
   useEffect(() => {
     if (appointmentType === "consulta" && !watchedConsultationType && selectedProfessional) {
       setValue("selectedProfessional", "")
@@ -70,30 +67,21 @@ export default function Step2ServiceSelection({
     }
   }, [watchedConsultationType, appointmentType, selectedProfessional, setValue, onProfessionalChange])
 
-  // Comunica o estado de validação para o componente pai
   useEffect(() => {
     if (onValidationChange) {
       onValidationChange(formState.isValid)
     }
   }, [formState.isValid, onValidationChange])
 
-  // Revalida quando o tipo de agendamento muda
   useEffect(() => {
     trigger()
   }, [watchedAppointmentType, trigger])
 
   const handleConsultationTypeChange = async (value: string) => {
     setValue("selectedConsultationType", value)
-    const object = await consultationTypes.find((item) => item.id == value)
 
     if (onConsultationTypeChange) {
-      if (object) {
-        console.log(object)
-        onConsultationTypeChange(object)
-      }
-      else {
-        onConsultationTypeChange(value)
-      }
+      onConsultationTypeChange(value)
     }
     trigger("selectedConsultationType")
   }
@@ -107,7 +95,6 @@ export default function Step2ServiceSelection({
     trigger("selectedProfessional")
   }
 
-  // Handlers para navegação
   const handleNext = () => {
     if (formState.isValid && onNext) {
       onNext()
@@ -250,7 +237,6 @@ export default function Step2ServiceSelection({
         </form>
       </Form>
 
-      {/* Indicador de campos obrigatórios */}
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
         <span className="text-destructive">*</span>
         <span>Campos obrigatórios</span>
