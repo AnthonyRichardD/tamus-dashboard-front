@@ -24,7 +24,7 @@ export default function AppointmentScheduling() {
 
     const [patients, setPatients] = useState<Paciente[]>([]);
     const [appointmentType, setAppointmentType] = useState<AppointmentType>(null)
-    const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null)
+    const [selectedPatient, setSelectedPatient] = useState<Paciente>()
     const [searchTerm, setSearchTerm] = useState("")
     const [currentStep, setCurrentStep] = useState(1)
 
@@ -168,6 +168,26 @@ export default function AppointmentScheduling() {
     const handleSearch = (value: string) => {
         const filters = { cpf: value }
         fetchPatients(1, filters)
+    }
+
+    const [selectedConsultationType, setSelectedConsultationType] = useState<{
+        id: number,
+        name: string,
+        duration_minutes: number,
+        active: boolean
+    }>()
+    const handleConsultationTypeChange = (value: {
+        id: number,
+        name: string,
+        duration_minutes: number,
+        active: boolean
+    }) => {
+        setSelectedConsultationType(value)
+    }
+
+    const [selectedProfessional, setSelectedProfessional] = useState<string>()
+    const handleProfessionalChange = (value: string) => {
+        setSelectedProfessional(value)
     }
 
     return (
@@ -364,6 +384,8 @@ export default function AppointmentScheduling() {
                                 onPrevious={handlePrevious}
                                 onCancel={handleCancel}
                                 currentStep={currentStep}
+                                onConsultationTypeChange={handleConsultationTypeChange}
+                                onProfessionalChange={handleProfessionalChange}
                             />
                         )}
 

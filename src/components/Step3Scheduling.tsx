@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { dateTimeConfirmationSchema, type DateTimeConfirmationFormData } from "@/lib/schemas/thirdStepValidations"
 import StepNavigation from "./appointment/StepNavigation"
+import { Paciente } from "@/types/patient.types"
 
 // Tipos locais
 export type AppointmentType = "consulta" | "exame"
@@ -25,7 +26,7 @@ export interface Patient {
 
 export interface Step3DateTimeConfirmationProps {
     appointmentType: AppointmentType
-    selectedPatient: Patient | null
+    selectedPatient: Paciente
     selectedDate: string
     selectedTime: string
     observations: string
@@ -167,6 +168,8 @@ export default function Step3DateTimeConfirmation({
         }
     }
 
+    console.log(selectedPatient)
+
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -293,7 +296,7 @@ export default function Step3DateTimeConfirmation({
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-muted-foreground">Paciente:</span>
                                 <span className="text-sm text-foreground font-medium">
-                                    {selectedPatient?.name || "Não selecionado"}
+                                    {selectedPatient?.full_name || "Não selecionado"}
                                 </span>
                             </div>
 

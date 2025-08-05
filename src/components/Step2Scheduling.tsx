@@ -1,10 +1,11 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { serviceSelectionSchema, type ServiceSelectionFormData } from "@/lib/schemas/secondStepValidations"
 import StepNavigation from "./appointment/StepNavigation"
+import appointmentServices from "@/services/appointment.services"
 
 // Definições de tipos
 export type AppointmentType = "consulta" | "exame"
@@ -13,7 +14,7 @@ export interface Step2ServiceSelectionProps {
   appointmentType: AppointmentType
   selectedProfessional: string
   selectedConsultationType: string
-  selectedExamType: string
+
   currentStep?: number
   totalSteps?: number
   onProfessionalChange?: (professional: string) => void
@@ -29,7 +30,6 @@ export default function Step2ServiceSelection({
   appointmentType,
   selectedProfessional = "",
   selectedConsultationType = "",
-  selectedExamType = "",
   currentStep = 2,
   totalSteps = 3,
   onProfessionalChange,
@@ -45,7 +45,6 @@ export default function Step2ServiceSelection({
       appointmentType,
       selectedConsultationType,
       selectedProfessional,
-      selectedExamType,
     },
     mode: "onChange",
   })
@@ -59,8 +58,7 @@ export default function Step2ServiceSelection({
     setValue("appointmentType", appointmentType)
     setValue("selectedConsultationType", selectedConsultationType)
     setValue("selectedProfessional", selectedProfessional)
-    setValue("selectedExamType", selectedExamType)
-  }, [appointmentType, selectedConsultationType, selectedProfessional, selectedExamType, setValue])
+  }, [appointmentType, selectedConsultationType, selectedProfessional, setValue])
 
   // Limpa o profissional quando o tipo de consulta muda
   useEffect(() => {
@@ -84,30 +82,30 @@ export default function Step2ServiceSelection({
     trigger()
   }, [watchedAppointmentType, trigger])
 
-  const handleConsultationTypeChange = (value: string) => {
+  const handleConsultationTypeChange = async (value: string) => {
     setValue("selectedConsultationType", value)
+    const object = await consultationTypes.find((item) => item.id == value)
+
     if (onConsultationTypeChange) {
-      onConsultationTypeChange(value)
+      if (object) {
+        console.log(object)
+        onConsultationTypeChange(object)
+      }
+      else {
+        onConsultationTypeChange(value)
+      }
     }
     trigger("selectedConsultationType")
   }
 
   const handleProfessionalChange = (value: string) => {
     setValue("selectedProfessional", value)
-    console.log(value)
+
     if (onProfessionalChange) {
       onProfessionalChange(value)
     }
     trigger("selectedProfessional")
   }
-
-  // const handleExamTypeChange = (value: string) => {
-  //   setValue("selectedExamType", value)
-  //   if (onExamTypeChange) {
-  //     onExamTypeChange(value)
-  //   }
-  //   trigger("selectedExamType")
-  // }
 
   // Handlers para navegação
   const handleNext = () => {
@@ -128,68 +126,49 @@ export default function Step2ServiceSelection({
     }
   }
 
+  const [consultationTypes, setConsultationTypes] = useState<{
+    id: string,
+    name: string,
+    duration_minutes: number,
+    active: boolean
+  }[]>([])
+  const getConsultationTypes = async () => {
+    try {
+      const response = await appointmentServices.listConsultationTypes()
+      if (!response.is_error) {
+        setConsultationTypes(response)
+      }
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    getConsultationTypes()
+  }, [])
+
+
+  const [professionals, setProfessionals] = useState<{ id: string, name: string, specialty: string }[]>([])
+  const listProfessionals = async (consultationTypeId: number) => {
+    try {
+      const response = await appointmentServices.getProffessionalsByConsultationType(consultationTypeId)
+      if (!response.is_error) {
+        setProfessionals(response)
+      }
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    if (watchedConsultationType) {
+      listProfessionals(parseInt(watchedConsultationType))
+    }
+  }, [watchedConsultationType])
+
   const showProfessionalField = appointmentType === "consulta" && watchedConsultationType
-
-  const mockConsultationTypes = [
-    {
-      id: "1",
-      name: "Consulta de Rotina",
-    },
-    {
-      id: "2",
-      name: "Consulta de Urgência",
-    },
-    {
-      id: "3",
-      name: "Consulta de Retorno",
-    },
-    {
-      id: "4",
-      name: "Primeira Consulta",
-    },
-    {
-      id: "5",
-      name: "Consulta de Acompanhamento",
-    },
-    {
-      id: "6",
-      name: "Consulta Especializada",
-    },
-  ]
-
-
-  const mockProfessionals = [
-    {
-      id: "1",
-      name: "Dr. Ana Silva",
-      specialty: "Cardiologia",
-    },
-    {
-      id: "2",
-      name: "Dr. Carlos Santos",
-      specialty: "Dermatologia",
-    },
-    {
-      id: "3",
-      name: "Dra. Maria Oliveira",
-      specialty: "Pediatria",
-    },
-    {
-      id: "4",
-      name: "Dr. João Pereira",
-      specialty: "Ortopedia",
-    },
-    {
-      id: "5",
-      name: "Dra. Lucia Costa",
-      specialty: "Ginecologia",
-    },
-    {
-      id: "6",
-      name: "Dr. Roberto Lima",
-      specialty: "Neurologia",
-    },
-  ]
 
   return (
     <div className="space-y-4">
@@ -202,32 +181,36 @@ export default function Step2ServiceSelection({
         <form className="space-y-6">
           {appointmentType === "consulta" && (
             <>
-              <FormField
-                control={form.control}
-                name="selectedConsultationType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Tipo de Consulta <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Select value={field.value || ""} onValueChange={handleConsultationTypeChange}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione o tipo de consulta" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {mockConsultationTypes.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {
+                consultationTypes.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="selectedConsultationType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Tipo de Consulta <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <Select value={field.value || ""} onValueChange={handleConsultationTypeChange}>
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecione o tipo de consulta" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {consultationTypes.map((type) => (
+                              <SelectItem key={type.id} value={String(type.id)}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )
+              }
 
               {showProfessionalField && (
                 <div className="animate-in slide-in-from-top-2 duration-300">
@@ -246,8 +229,8 @@ export default function Step2ServiceSelection({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {mockProfessionals.map((professional) => (
-                              <SelectItem key={professional.id} value={professional.id}>
+                            {professionals.map((professional) => (
+                              <SelectItem key={professional.id} value={String(professional.id)}>
                                 <div className="flex flex-col">
                                   <span className="font-medium">{professional.name} - <span className="text-xs text-muted-foreground">{professional.specialty}</span></span>
 
@@ -264,35 +247,6 @@ export default function Step2ServiceSelection({
               )}
             </>
           )}
-
-          {/* {appointmentType === "exame" && (
-            <FormField
-              control={form.control}
-              name="selectedExamType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">
-                    Tipo de Exame <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select value={field.value || ""} onValueChange={handleExamTypeChange}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione o tipo de exame" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {mockExamTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )} */}
         </form>
       </Form>
 
