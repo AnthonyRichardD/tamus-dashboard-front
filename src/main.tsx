@@ -44,7 +44,7 @@ createRoot(document.getElementById('root')!).render(
           {/* Rotas protegidas ou que usam o layout do Dashboard */}
           <Route element={<DashboardLayout />}>
             <Route path="/detalhes-consulta" element={<ConultationDetails />} />
-            <Route path="/agendamento" element={<NewScheduling />} />
+            <Route path="/scheduling" element={<NewScheduling />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/detalhes-consulta" element={<ConultationDetails />} />
             <Route

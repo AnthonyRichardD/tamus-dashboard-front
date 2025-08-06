@@ -7,6 +7,8 @@ import {
   UserCog,
   ChevronLeft,
   UserIcon,
+  CalendarCheck2,
+  BookCheck,
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router';
@@ -54,9 +56,10 @@ function DesktopSidebarContent({ userRole }: { userRole: string | undefined }) {
 
   const sidebarItems = [
     { name: 'Dashboard', path: '/', roles: ['admin', 'superadmin'], icon: <LayoutDashboard /> },
-    { name: 'Administradores', path: '/admin/list', roles: ['superadmin'], icon: <UserCog /> },
     { name: 'Pacientes', path: '/patient/list', roles: ['admin', 'superadmin'], icon: <UserIcon /> },
-    { name: 'Consultas', path: '/detalhes-consulta', roles: ['admin', 'superadmin'], icon: <UserIcon /> },
+    { name: 'Agendamento', path: '/scheduling', roles: ['admin', 'superadmin'], icon: <CalendarCheck2 /> },
+    { name: 'Consultas', path: '/detalhes-consulta', roles: ['admin', 'superadmin'], icon: <BookCheck /> },
+    { name: 'Administradores', path: '/admin/list', roles: ['superadmin'], icon: <UserCog /> },
   ];
 
 

@@ -208,8 +208,8 @@ export default function AppointmentScheduling() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="w-full px-4">
+        <div className="min-h-screen bg-gray-50 p-4">
+            <div className="w-full">
                 <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Novo Agendamento</h1>
