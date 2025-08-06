@@ -53,7 +53,7 @@ function DesktopSidebarContent({ userRole }: { userRole: string | undefined }) {
 
 
   const sidebarItems = [
-    { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'superadmin'], icon: <LayoutDashboard /> },
+    { name: 'Dashboard', path: '/', roles: ['admin', 'superadmin'], icon: <LayoutDashboard /> },
     { name: 'Administradores', path: '/admin/list', roles: ['superadmin'], icon: <UserCog /> },
     { name: 'Pacientes', path: '/patient/list', roles: ['admin', 'superadmin'], icon: <UserIcon /> },
     { name: 'Consultas', path: '/detalhes-consulta', roles: ['admin', 'superadmin'], icon: <UserIcon /> },

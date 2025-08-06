@@ -25,7 +25,7 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response.data, 
+  (response) => response.data,
   (error: AxiosError): Promise<ApiError> => {
     const apiError: ApiError = {
       message:
@@ -36,7 +36,7 @@ api.interceptors.response.use(
     };
 
     if (error.response?.status === 403) {
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     }
 
     return Promise.reject(apiError);

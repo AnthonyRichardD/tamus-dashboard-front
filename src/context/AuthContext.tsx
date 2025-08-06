@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                 api.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
 
-                navigate('/dashboard');
+                navigate('/');
                 return {
                     is_error: false,
                     message: response.message,

@@ -76,7 +76,7 @@ export default function ConsultationDetails() {
 
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    navigate('/');
   };
 
   const handlePeriod = (period: FilterPeriod) => {

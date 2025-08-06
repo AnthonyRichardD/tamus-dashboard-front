@@ -4,7 +4,6 @@ import { BrowserRouter, Route, Routes } from 'react-router';
 import RecoverPassword from './pages/RecoverPassword.tsx';
 import './index.css';
 
-import App from './App.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import RecoverPasswordToken from './pages/RecoverPasswordToken.tsx';
 import DashboardLayout from './components/layout/DashboardLayout.tsx';

@@ -126,7 +126,7 @@ export default function AppointmentScheduling() {
 
 
     const handleBackToDashboard = () => {
-        navigate("/dashboard");
+        navigate("/");
     }
 
     const handleNext = () => {
@@ -148,7 +148,7 @@ export default function AppointmentScheduling() {
     }
 
     const handleCancel = () => {
-        navigate('/dashboard');
+        navigate('/');
     }
 
     const handleSearch = (value: string) => {
