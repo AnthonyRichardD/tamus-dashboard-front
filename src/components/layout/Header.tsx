@@ -23,7 +23,6 @@ export function Header({ onMenuClick }: HeaderProps) {
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
-          <span className="hidden md:inline">Dashboard</span>
         </nav>
         <div className="p-4 border-t">
           <div className="flex items-center gap-3">

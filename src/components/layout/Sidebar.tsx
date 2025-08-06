@@ -72,21 +72,8 @@ function DesktopSidebarContent({ userRole }: { userRole: string | undefined }) {
     <div className="justify-between flex h-full flex-col">
       {/* Header */}
       <div className="flex h-16 min-h-16 content-center items-center px-4 border-b gap-2">
-        <div className="size-8 bg-teal-600 rounded-full flex items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-6"
-          >
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-          </svg>
-        </div>
-        <span>Agenda Saúde</span>
+        <img src="/logo.png" width={40} alt="logo" />
+        <span className='font-semibold ml-[-5px]'>Agenda Saúde</span>
       </div>
 
       {/* Menu de Navegação */}
