@@ -18,14 +18,14 @@ import { useAlertStore } from "@/store/DialogAlert";
 import PatientService from "../../services/patient.service"; // Importa apenas o serviço
 import { Paciente } from "@/types/patient.types"; // Importa a interface Paciente de um local central
 
-import { formatCPF } from "@/utils/formatUtils";
+import { formatCPF, formatPhone } from "@/utils/formatUtils";
 
 // Colunas da tabela de pacientes
 const columns: TableColumn<Paciente>[] = [
   { label: "Nome", key: "full_name", sortable: true },
   { label: "CPF", key: "cpf", sortable: false, slot: true },
   { label: "Email", key: "email", sortable: true },
-  { label: "Telefone", key: "phone", sortable: false },
+  { label: "Telefone", key: "phone", sortable: false, slot: true },
   { label: "Idade", key: "birth_date", sortable: false, slot: true },
   { label: "Status", key: "active", sortable: true, slot: true },
   { label: "Data de Cadastro", key: "registration_date", sortable: true, slot: true },
@@ -143,7 +143,7 @@ export function PatientList() {
       case "email":
         return item.email;
       case "phone":
-        return item.phone;
+        return formatPhone(item.phone);
       case "birth_date":
         return `${calculateAge(item.birth_date)} anos`;
       case "active":

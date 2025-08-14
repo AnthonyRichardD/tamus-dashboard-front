@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router"
 import moment from "moment"
 import { useAlertStore } from "@/store/DialogAlert"
 import adminServices from "@/services/admin.services"
-import { formatCPF } from "@/utils/formatUtils"
+import { formatCPF, formatPhone } from "@/utils/formatUtils"
 
 interface Administrador {
     id: number,
@@ -83,7 +83,7 @@ export function AdminList() {
         { label: "Nome", key: "full_name", sortable: true },
         { label: "CPF", key: "cpf", sortable: false, slot: true },
         { label: "Email", key: "email", sortable: true },
-        { label: "Telefone", key: "phone", sortable: false },
+        { label: "Telefone", key: "phone", sortable: false, slot: true },
         { label: "Cargo", key: "role", sortable: true, slot: true },
         { label: "Status", key: "status", sortable: true, slot: true },
         { label: "Data de Cadastro", key: "registration_date", sortable: true, slot: true },
@@ -109,6 +109,8 @@ export function AdminList() {
 
     const renderCell = (item: Administrador, column: TableColumn<Administrador>): ReactNode => {
         switch (column.key) {
+            case "phone":
+                return formatPhone(item.phone)
             case "full_name":
                 return <span className="font-medium">{item.full_name}</span>
             case "cpf":

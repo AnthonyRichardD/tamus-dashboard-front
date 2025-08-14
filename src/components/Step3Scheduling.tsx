@@ -166,9 +166,10 @@ export default function Step3DateTimeConfirmation({
     }
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-lg font-semibold text-foreground">Data e Horário</h2>
+        <div className="space-y-4">
+
+            <div className="space-y-1">
+                <h2 className="text-2xl font-semibold text-foreground">Data e Horário</h2>
                 <p className="text-sm text-muted-foreground">Defina a data, horário e observações</p>
             </div>
 
